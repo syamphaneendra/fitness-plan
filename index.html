@@ -1053,6 +1053,13 @@
     });
   }
 
+  function todayDayId(){
+    var g = new Date().getDay();            // 0=Sun..6=Sat (local time)
+    var dayIndex = (g === 0) ? 7 : g;       // Mon=1..Sun=7
+    var id = 'day' + dayIndex;
+    return (days.indexOf(id) !== -1) ? id : 'day1';  // fallback if out of range
+  }
+
   function showDay(id, btn){
     days.forEach(function(d){ document.getElementById(d).classList.remove('active'); });
     document.getElementById(id).classList.add('active');
@@ -1063,14 +1070,14 @@
 
   function selectMode(mode){
     try { localStorage.setItem('fitnessMode', mode); } catch(e) {}
+    // preserve the currently active day across the mode re-render
+    var activeSection = document.querySelector('.day.active');
+    var keepId = activeSection ? activeSection.id : todayDayId();
+    if(days.indexOf(keepId) === -1){ keepId = 'day1'; }
     renderMode(mode);
-    // reset to day 1 for predictable scroll-to-top
-    days.forEach(function(d){ document.getElementById(d).classList.remove('active'); });
-    document.getElementById('day1').classList.add('active');
-    Array.prototype.forEach.call(tabsEl.children, function(b, i){
-      b.classList.toggle('active', i === 0);
-    });
-    window.scrollTo({top:0, behavior:'smooth'});
+    var keepIdx = days.indexOf(keepId);
+    var keepBtn = tabsEl.children[keepIdx] || null;
+    showDay(keepId, keepBtn);
   }
 
   Array.prototype.forEach.call(modesEl.children, function(b){
@@ -1106,8 +1113,10 @@
 
   buildTabs();
   renderMode(savedMode);
-  document.getElementById('day1').classList.add('active');
-  if(tabsEl.children.length){ tabsEl.children[0].classList.add('active'); }
+  var initialId = todayDayId();
+  var initialIdx = days.indexOf(initialId);
+  var initialBtn = tabsEl.children[initialIdx] || null;
+  showDay(initialId, initialBtn);
 
   // ===== PWA service worker registration =====
   if('serviceWorker' in navigator){

@@ -1,5 +1,5 @@
 // Cache-first service worker for the 7-Day Fitness Plan PWA.
-var CACHE_NAME = 'fitness-cache-v2';
+var CACHE_NAME = 'fitness-cache-v3';
 var PRECACHE_URLS = [
   './',
   './index.html',
