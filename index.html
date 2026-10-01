@@ -7,26 +7,107 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Fitness Plan">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#132226">
+<!-- Three theme-color metas, deliberate (NOT a duplication bug):
+     - The two media-scoped metas cover the pre-JS / Auto case so the iOS status
+       bar is correct on first paint and whenever the choice is Auto (resolved by
+       the OS media query).
+     - The managed meta (id, no media attr) is the dynamic override for explicit
+       Light/Dark choices; JS rewrites its content so an explicit choice that
+       disagrees with the OS still colors the status bar. Browsers apply the last
+       matching meta, which is the intended precedence. Do not "fix" by removing. -->
+<meta name="theme-color" content="#0f1c20" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f4f7f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" id="theme-color-meta" content="#0f1c20">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <title>7-Day Muscle Building Plan</title>
+<!-- First-paint theme: resolve fitnessTheme BEFORE first paint so explicit
+     Light/Dark overrides (and Auto) never flash. This assumes NO inline-script-
+     blocking Content-Security-Policy is present — the site has none and already
+     relies on inline <script>/<style>. If a CSP is ever introduced, both inline
+     scripts and the inline <style> would need a nonce/hash. -->
+<script>
+  try {
+    var c = localStorage.getItem('fitnessTheme');
+    if (c !== 'light' && c !== 'dark' && c !== 'auto') c = 'auto';
+    var dark = (c === 'dark') ||
+               (c === 'auto' && window.matchMedia &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  } catch (e) { /* storage blocked: leave :root defaults + media-query fallback */ }
+</script>
 <style>
+  /* Theme tokens. :root holds the DARK set so first paint is correct before JS.
+     The prefers-color-scheme media block gives the pre-JS Auto light fallback.
+     Explicit [data-theme] blocks (set by the first-paint script / JS) win over
+     the media query because attribute selectors have higher specificity. */
   :root{
-    --bg:#132226;
-    --panel:#1b3238;
-    --panel2:#20393f;
-    --accent:#3fb28f;
-    --accent2:#e8985a;
+    --bg:#0f1c20;
+    --panel:#172c31;
+    --panel2:#1d353b;
     --text:#eef3f2;
-    --muted:#9db3ae;
-    --line:#2c454b;
+    --muted:#b4c7c2;
+    --accent:#3fb28f;         /* fills (pills/buttons) — identity green */
+    --accent-text:#4cc39e;    /* accent used AS TEXT (summaries, th) */
+    --accent2:#efa368;        /* warm amber (tags, sets, headings) */
+    --ink:#0d1f1c;            /* text ON accent/accent2 fills */
+    --line:#27424a;
+    --border-strong:#4cc39e;  /* focus ring + active-control boundary */
+    --focus:#4cc39e;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme]){
+      --bg:#f4f7f6;
+      --panel:#ffffff;
+      --panel2:#e8efed;
+      --text:#10242a;
+      --muted:#4a6660;
+      --accent:#0e7254;
+      --accent-text:#0e7254;
+      /* --accent2 #a85218 on --bg is the tightest text pairing at 5.01:1;
+         re-measure if either --accent2 or --bg changes. */
+      --accent2:#a85218;
+      --ink:#ffffff;
+      --line:#d4e0dc;
+      --border-strong:#6f8882;
+      --focus:#0e7254;
+    }
+  }
+  [data-theme="dark"]{
+    --bg:#0f1c20;
+    --panel:#172c31;
+    --panel2:#1d353b;
+    --text:#eef3f2;
+    --muted:#b4c7c2;
+    --accent:#3fb28f;
+    --accent-text:#4cc39e;
+    --accent2:#efa368;
+    --ink:#0d1f1c;
+    --line:#27424a;
+    --border-strong:#4cc39e;
+    --focus:#4cc39e;
+  }
+  [data-theme="light"]{
+    --bg:#f4f7f6;
+    --panel:#ffffff;
+    --panel2:#e8efed;
+    --text:#10242a;
+    --muted:#4a6660;
+    --accent:#0e7254;
+    --accent-text:#0e7254;
+    /* --accent2 #a85218 on --bg is the tightest text pairing at 5.01:1;
+       re-measure if either --accent2 or --bg changes. */
+    --accent2:#a85218;
+    --ink:#ffffff;
+    --line:#d4e0dc;
+    --border-strong:#6f8882;
+    --focus:#0e7254;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
     -webkit-font-smoothing:antialiased;}
-  body{padding-bottom:40px;}
+  body{padding-bottom:calc(96px + env(safe-area-inset-bottom));}  /* reserve space for the fixed rest-timer bar */
 
   header{position:sticky; top:0; z-index:20; background:var(--bg);
     padding:14px 16px 0 16px; border-bottom:1px solid var(--line);}
@@ -36,13 +117,13 @@
   .modes{display:flex; gap:6px; padding-bottom:10px;}
   .mode-pill{flex:0 0 auto; background:transparent; border:1px solid var(--line); color:var(--muted);
     padding:7px 15px; border-radius:20px; font-size:13px; font-weight:600; font-family:inherit;}
-  .mode-pill.active{background:var(--accent); border-color:var(--accent); color:#0d1f1c;}
+  .mode-pill.active{background:var(--accent); border-color:var(--accent); color:var(--ink);}
 
   nav{display:flex; gap:4px; padding-bottom:10px;}
   nav button{flex:1 1 0; min-width:0; background:transparent; border:1px solid var(--line); color:var(--muted);
     padding:7px 2px; border-radius:16px; font-size:12.5px; font-weight:600; font-family:inherit;
     text-align:center; white-space:nowrap;}
-  nav button.active{background:var(--accent); border-color:var(--accent); color:#0d1f1c;}
+  nav button.active{background:var(--accent); border-color:var(--accent); color:var(--ink);}
   @media (max-width:360px){
     nav{gap:3px;}
     nav button{font-size:11.5px; padding:7px 1px; border-radius:12px;}
@@ -60,18 +141,18 @@
     display:flex; align-items:center; gap:12px; border:1px solid var(--line);}
   .icon-wrap{flex:0 0 auto; width:56px; height:56px; background:var(--panel2); border-radius:12px;
     display:flex; align-items:center; justify-content:center;}
-  .icon-wrap svg{width:38px; height:38px;}
+  .icon-wrap svg{width:38px; height:38px; color:var(--accent);}  /* icons use currentColor, follow accent per theme */
   .card-body{flex:1; min-width:0;}
   .ex-name{font-size:14.5px; font-weight:600; margin:0 0 2px 0;}
   .ex-sets{font-size:12.5px; color:var(--accent2); font-weight:600; margin:0 0 2px 0;}
   .ex-weight{font-size:11.5px; color:var(--muted); margin:0 0 6px 0;}
   .meal-card{background:var(--panel); border-radius:14px; padding:12px 14px; margin-bottom:10px; border:1px solid var(--line);}
-  .meal-tag{display:inline-block; font-size:10.5px; font-weight:700; color:#0d1f1c; background:var(--accent2);
+  .meal-tag{display:inline-block; font-size:10.5px; font-weight:700; color:var(--ink); background:var(--accent2);
     padding:2px 8px; border-radius:6px; margin-bottom:6px;}
   .meal-name{font-size:14.5px; font-weight:700; margin:0 0 4px 0;}
   .meal-desc{font-size:12.5px; color:var(--text); margin:0 0 8px 0; line-height:1.45;}
   details.recipe{font-size:12px; color:var(--muted);}
-  details.recipe summary{cursor:pointer; color:var(--accent); font-weight:700; font-size:12px; list-style:none;}
+  details.recipe summary{cursor:pointer; color:var(--accent-text); font-weight:700; font-size:12px; list-style:none;}
   details.recipe summary::-webkit-details-marker{display:none;}
   details.recipe summary::before{content:"▸ "; }
   details.recipe[open] summary::before{content:"▾ "; }
@@ -79,7 +160,7 @@
   details.recipe .r-ing b, details.recipe .r-steps b{color:var(--accent2);}
   details.recipe ol{margin:4px 0 0 0; padding-left:18px; color:var(--text);}
   details.recipe ol li{margin-bottom:4px; line-height:1.4;}
-  .watch{display:inline-flex; align-items:center; gap:6px; background:var(--accent); color:#0d1f1c;
+  .watch{display:inline-flex; align-items:center; gap:6px; background:var(--accent); color:var(--ink);
     font-size:12.5px; font-weight:700; padding:6px 11px; border-radius:8px; text-decoration:none;
     font-family:inherit; border:0; cursor:pointer;}
   .video-embed{}
@@ -91,7 +172,7 @@
   h3.section{font-size:13.5px; color:var(--accent2); margin:20px 0 8px 0; font-weight:700;}
   table{width:100%; border-collapse:collapse; font-size:12.5px; background:var(--panel);
     border-radius:12px; overflow:hidden; border:1px solid var(--line);}
-  th{background:var(--panel2); text-align:left; padding:8px 10px; color:var(--accent); font-size:11.5px;}
+  th{background:var(--panel2); text-align:left; padding:8px 10px; color:var(--accent-text); font-size:11.5px;}
   td{padding:8px 10px; border-top:1px solid var(--line); vertical-align:top;}
   td.meal{font-weight:700; width:24%; color:var(--accent2);}
 
@@ -100,19 +181,104 @@
   .note b{color:var(--accent2);}
   .framework-details{background:var(--panel); border:1px solid var(--line); border-radius:14px;
     padding:12px 16px; margin-bottom:18px;}
-  .framework-details > summary{cursor:pointer; color:var(--accent); font-weight:700; font-size:13px;
+  .framework-details > summary{cursor:pointer; color:var(--accent-text); font-weight:700; font-size:13px;
     list-style:none;}
   .framework-details > summary::-webkit-details-marker{display:none;}
   .framework-details > summary::before{content:"▸ ";}
   .framework-details[open] > summary::before{content:"▾ ";}
   .framework{font-size:12.5px; line-height:1.55; margin-top:8px;}
-  .framework b{color:var(--accent);}
+  .framework b{color:var(--accent-text);}
   .framework ul{margin:4px 0 0 0; padding-left:18px;}
   .framework li{margin-bottom:6px;}
   footer{padding:18px 16px 0 16px; font-size:11px; color:var(--muted); line-height:1.5;}
   .install-tip{margin:14px 16px 0 16px; background:var(--panel2); border:1px dashed var(--accent);
     border-radius:12px; padding:10px 14px; font-size:12px; color:var(--muted);}
   .install-tip b{color:var(--text);}
+
+  /* ===== Part A: non-color affordances ===== */
+  /* Visible focus indicator on every interactive control. Never suppress it. */
+  :focus-visible{ outline:2px solid var(--focus); outline-offset:2px; border-radius:inherit; }
+  @media (prefers-reduced-motion: reduce){
+    .day.active{ animation:none; }
+    .rt-display.flash{ animation:none; }
+  }
+  /* Screen-reader-only utility. The rest-timer status node (.rt-status) relies on
+     this to stay in the accessibility tree while off-screen. NEVER use
+     display:none or visibility:hidden here — either removes the node from the
+     a11y tree and silently kills the aria-live announcements. */
+  .visually-hidden{
+    position:absolute !important;
+    width:1px; height:1px;
+    margin:-1px; padding:0; border:0;
+    clip:rect(0 0 0 0); clip-path:inset(50%);
+    overflow:hidden; white-space:nowrap;
+  }
+
+  /* ===== Part B: theme segmented control ===== */
+  .theme-control{display:flex; gap:6px; padding-bottom:10px;}
+  .theme-seg{flex:0 0 auto; display:inline-flex; align-items:center; gap:5px;
+    background:transparent; border:1px solid var(--line); color:var(--muted);
+    padding:7px 13px; min-height:36px; border-radius:20px; font-size:12.5px; font-weight:600;
+    font-family:inherit; cursor:pointer;}
+  .theme-seg svg{width:15px; height:15px;}
+  .theme-seg.active{background:var(--accent); border-color:var(--accent); color:var(--ink);}
+
+  /* ===== Part D: done checkbox + completed card treatment ===== */
+  .ex-done{flex:0 0 auto; width:22px; height:22px; margin:0; cursor:pointer; accent-color:var(--accent);}
+  .ex-done-label{flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center;
+    min-width:44px; min-height:44px; margin:-11px 0; cursor:pointer;}
+  /* .card.done is decorative reinforcement only — the native checkbox state is the
+     sole announced indicator; meaning is never conveyed by this styling alone. */
+  .card.done{border-color:var(--accent);}
+  .card.done .icon-wrap{opacity:0.55;}
+
+  /* ===== Part D: per-day progress indicator ===== */
+  .day-progress{display:flex; align-items:center; gap:10px; margin:0 0 12px 0;}
+  .dp-count{flex:0 0 auto; font-size:12px; color:var(--muted); font-weight:600; min-width:62px;}
+  .dp-bar{flex:1 1 auto; height:6px; background:var(--panel2); border:1px solid var(--line);
+    border-radius:6px; overflow:hidden;}
+  .dp-fill{height:100%; width:0%; background:var(--accent); border-radius:6px; transition:width .2s ease;}
+  @media (prefers-reduced-motion: reduce){ .dp-fill{transition:none;} }
+
+  /* ===== Part D: rest timer ===== */
+  .rest-timer{position:fixed; left:0; right:0; bottom:0; z-index:30;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    background:var(--panel); border-top:1px solid var(--line);
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom)) 14px;}
+  .rt-display{flex:0 0 auto; font-size:18px; font-weight:700; color:var(--text);
+    font-variant-numeric:tabular-nums; min-width:52px;}
+  .rt-display.flash{animation:rtflash .4s ease;}
+  @keyframes rtflash{0%{color:var(--accent2);}100%{color:var(--text);}}
+  .rt-btn{flex:0 0 auto; background:transparent; border:1px solid var(--line); color:var(--muted);
+    padding:8px 13px; min-height:40px; border-radius:18px; font-size:12.5px; font-weight:600;
+    font-family:inherit; cursor:pointer;}
+  .rt-btn.rt-primary{background:var(--accent); border-color:var(--accent); color:var(--ink);}
+  @media (max-width:360px){
+    .rt-btn{padding:8px 10px; font-size:11.5px;}
+    .rt-display{font-size:16px; min-width:46px;}
+  }
+
+  /* ===== Part E: logger ===== */
+  details.logger{font-size:12px; color:var(--muted); margin-top:8px;}
+  details.logger > summary{cursor:pointer; color:var(--accent-text); font-weight:700; font-size:12px; list-style:none;}
+  details.logger > summary::-webkit-details-marker{display:none;}
+  details.logger > summary::before{content:"▸ ";}
+  details.logger[open] > summary::before{content:"▾ ";}
+  .log-form{display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; margin:8px 0 4px 0;}
+  .log-field{display:flex; flex-direction:column; gap:2px;}
+  .log-field label{font-size:11px; color:var(--muted); font-weight:600;}
+  .log-field input{width:72px; background:var(--panel2); border:1px solid var(--line); color:var(--text);
+    border-radius:8px; padding:7px 8px; font-size:13px; font-family:inherit; min-height:40px;}
+  .log-save{background:var(--accent); border:1px solid var(--accent); color:var(--ink);
+    padding:8px 15px; min-height:40px; border-radius:8px; font-size:12.5px; font-weight:700;
+    font-family:inherit; cursor:pointer;}
+  .log-error{display:none; color:var(--accent2); font-size:11.5px; font-weight:600; margin:2px 0 0 0;}
+  .log-error.show{display:block;}
+  .ex-last{font-size:12px; color:var(--muted); margin:8px 0 4px 0;}
+  .log-history{margin:4px 0 0 0; padding-left:16px; font-size:11.5px; color:var(--muted);}
+  .log-history li{margin-bottom:3px;}
+  .log-spark{display:block; width:100px; height:24px; margin-top:6px;}
+  .privacy-note{margin:14px 16px 0 16px; font-size:11px; color:var(--muted); line-height:1.5;}
 </style>
 </head>
 <body>
@@ -120,9 +286,9 @@
 <!-- ============ ICON LIBRARY (reused via <use>) ============ -->
 <svg width="0" height="0" style="position:absolute">
 <defs>
-<g id="ico-press" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <rect x="8" y="72" width="84" height="8" rx="3" fill="#20393f" stroke="none"/>
-  <circle cx="22" cy="58" r="9" fill="#20393f"/>
+<g id="ico-press" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="8" y="72" width="84" height="8" rx="3" fill="var(--panel2)" stroke="none"/>
+  <circle cx="22" cy="58" r="9" fill="var(--panel2)"/>
   <line x1="30" y1="58" x2="70" y2="60"/>
   <line x1="70" y1="60" x2="86" y2="48"/>
   <line x1="86" y1="48" x2="80" y2="70"/>
@@ -130,8 +296,8 @@
   <line x1="55" y1="59" x2="55" y2="25"/>
   <line x1="25" y1="25" x2="70" y2="25" stroke-width="7"/>
 </g>
-<g id="ico-ohp" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+<g id="ico-ohp" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="24" x2="50" y2="55"/>
   <line x1="50" y1="55" x2="38" y2="90"/>
   <line x1="50" y1="55" x2="62" y2="90"/>
@@ -139,64 +305,64 @@
   <line x1="50" y1="28" x2="65" y2="8"/>
   <line x1="25" y1="6" x2="75" y2="6" stroke-width="7"/>
 </g>
-<g id="ico-dip" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<g id="ico-dip" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <line x1="22" y1="18" x2="22" y2="72"/>
   <line x1="78" y1="18" x2="78" y2="72"/>
-  <circle cx="50" cy="30" r="9" fill="#20393f"/>
+  <circle cx="50" cy="30" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="39" x2="50" y2="65"/>
   <line x1="50" y1="45" x2="22" y2="45"/>
   <line x1="50" y1="45" x2="78" y2="45"/>
   <line x1="50" y1="65" x2="62" y2="80"/>
   <line x1="62" y1="80" x2="56" y2="95"/>
 </g>
-<g id="ico-pushdown" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+<g id="ico-pushdown" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="24" x2="50" y2="58" stroke-dasharray="0"/>
   <line x1="50" y1="58" x2="42" y2="90"/>
   <line x1="50" y1="58" x2="58" y2="90"/>
-  <line x1="50" y1="0" x2="50" y2="40" stroke-width="3" stroke="#9db3ae"/>
+  <line x1="50" y1="0" x2="50" y2="40" stroke-width="3" stroke="var(--muted)"/>
   <line x1="50" y1="30" x2="50" y2="45"/>
   <line x1="50" y1="45" x2="50" y2="72"/>
 </g>
-<g id="ico-lateral" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+<g id="ico-lateral" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="24" x2="50" y2="58"/>
   <line x1="50" y1="58" x2="42" y2="90"/>
   <line x1="50" y1="58" x2="58" y2="90"/>
   <line x1="50" y1="30" x2="20" y2="30"/>
   <line x1="50" y1="30" x2="80" y2="30"/>
-  <circle cx="20" cy="30" r="6" fill="#20393f"/>
-  <circle cx="80" cy="30" r="6" fill="#20393f"/>
+  <circle cx="20" cy="30" r="6" fill="var(--panel2)"/>
+  <circle cx="80" cy="30" r="6" fill="var(--panel2)"/>
 </g>
-<g id="ico-pullup" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<g id="ico-pullup" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <line x1="18" y1="8" x2="82" y2="8" stroke-width="7"/>
   <line x1="35" y1="8" x2="50" y2="35"/>
   <line x1="65" y1="8" x2="50" y2="35"/>
-  <circle cx="50" cy="42" r="9" fill="#20393f"/>
+  <circle cx="50" cy="42" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="51" x2="50" y2="75"/>
   <line x1="50" y1="75" x2="43" y2="95"/>
   <line x1="50" y1="75" x2="57" y2="95"/>
 </g>
-<g id="ico-row" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="25" cy="30" r="9" fill="#20393f"/>
+<g id="ico-row" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="25" cy="30" r="9" fill="var(--panel2)"/>
   <line x1="32" y1="36" x2="66" y2="55"/>
   <line x1="66" y1="55" x2="62" y2="90"/>
   <line x1="66" y1="55" x2="78" y2="88"/>
   <line x1="45" y1="47" x2="33" y2="68"/>
-  <circle cx="33" cy="68" r="6" fill="#20393f"/>
+  <circle cx="33" cy="68" r="6" fill="var(--panel2)"/>
 </g>
-<g id="ico-curl" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+<g id="ico-curl" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="24" x2="50" y2="58"/>
   <line x1="50" y1="58" x2="42" y2="90"/>
   <line x1="50" y1="58" x2="58" y2="90"/>
   <line x1="55" y1="28" x2="60" y2="55"/>
   <line x1="60" y1="55" x2="45" y2="30"/>
-  <circle cx="45" cy="30" r="6" fill="#20393f"/>
+  <circle cx="45" cy="30" r="6" fill="var(--panel2)"/>
 </g>
-<g id="ico-latpull" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<g id="ico-latpull" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <line x1="30" y1="85" x2="70" y2="85"/>
-  <circle cx="50" cy="25" r="9" fill="#20393f"/>
+  <circle cx="50" cy="25" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="34" x2="50" y2="78"/>
   <line x1="50" y1="38" x2="30" y2="14"/>
   <line x1="50" y1="38" x2="70" y2="14"/>
@@ -204,17 +370,17 @@
   <line x1="50" y1="78" x2="40" y2="94"/>
   <line x1="50" y1="78" x2="60" y2="94"/>
 </g>
-<g id="ico-squat" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<g id="ico-squat" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <line x1="28" y1="24" x2="72" y2="24" stroke-width="7"/>
-  <circle cx="50" cy="14" r="9" fill="#20393f"/>
+  <circle cx="50" cy="14" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="23" x2="50" y2="55"/>
   <line x1="50" y1="55" x2="35" y2="70"/>
   <line x1="50" y1="55" x2="65" y2="70"/>
   <line x1="35" y1="70" x2="38" y2="95"/>
   <line x1="65" y1="70" x2="62" y2="95"/>
 </g>
-<g id="ico-lunge" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+<g id="ico-lunge" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="24" x2="50" y2="55"/>
   <line x1="50" y1="30" x2="42" y2="50"/>
   <line x1="50" y1="30" x2="58" y2="50"/>
@@ -223,24 +389,24 @@
   <line x1="50" y1="55" x2="72" y2="75"/>
   <line x1="72" y1="75" x2="84" y2="93"/>
 </g>
-<g id="ico-plank" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <line x1="4" y1="80" x2="96" y2="80" stroke-width="2" stroke="#3a5a60"/>
-  <circle cx="16" cy="45" r="8" fill="#20393f"/>
+<g id="ico-plank" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="4" y1="80" x2="96" y2="80" stroke-width="2" stroke="var(--line)"/>
+  <circle cx="16" cy="45" r="8" fill="var(--panel2)"/>
   <line x1="23" y1="45" x2="82" y2="48"/>
   <line x1="82" y1="48" x2="95" y2="50"/>
   <line x1="30" y1="47" x2="30" y2="70"/>
   <line x1="30" y1="70" x2="46" y2="70"/>
 </g>
-<g id="ico-legpress" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<g id="ico-legpress" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <line x1="14" y1="26" x2="14" y2="68" stroke-width="6"/>
-  <circle cx="26" cy="33" r="9" fill="#20393f"/>
+  <circle cx="26" cy="33" r="9" fill="var(--panel2)"/>
   <line x1="26" y1="42" x2="45" y2="58"/>
   <line x1="45" y1="58" x2="66" y2="53"/>
   <line x1="66" y1="53" x2="86" y2="48"/>
   <line x1="86" y1="28" x2="86" y2="70" stroke-width="7"/>
 </g>
-<g id="ico-calf" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+<g id="ico-calf" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="24" x2="50" y2="58"/>
   <line x1="50" y1="30" x2="40" y2="50"/>
   <line x1="50" y1="30" x2="60" y2="50"/>
@@ -249,8 +415,8 @@
   <line x1="38" y1="88" x2="47" y2="94"/>
   <line x1="53" y1="88" x2="62" y2="94"/>
 </g>
-<g id="ico-walk" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+<g id="ico-walk" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="24" x2="50" y2="55"/>
   <line x1="50" y1="55" x2="66" y2="72"/>
   <line x1="66" y1="72" x2="70" y2="95"/>
@@ -259,27 +425,27 @@
   <line x1="50" y1="30" x2="34" y2="45"/>
   <line x1="50" y1="30" x2="63" y2="48"/>
 </g>
-<g id="ico-twist" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <line x1="15" y1="92" x2="85" y2="92" stroke-width="2" stroke="#3a5a60"/>
-  <circle cx="45" cy="30" r="9" fill="#20393f"/>
+<g id="ico-twist" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="15" y1="92" x2="85" y2="92" stroke-width="2" stroke="var(--line)"/>
+  <circle cx="45" cy="30" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="38" x2="52" y2="70"/>
   <line x1="52" y1="70" x2="70" y2="76"/>
   <line x1="70" y1="76" x2="86" y2="68"/>
   <line x1="48" y1="46" x2="25" y2="56"/>
   <line x1="48" y1="46" x2="33" y2="62"/>
 </g>
-<g id="ico-hanglegraise" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<g id="ico-hanglegraise" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <line x1="18" y1="8" x2="82" y2="8" stroke-width="7"/>
   <line x1="35" y1="8" x2="50" y2="30"/>
   <line x1="65" y1="8" x2="50" y2="30"/>
-  <circle cx="50" cy="37" r="9" fill="#20393f"/>
+  <circle cx="50" cy="37" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="46" x2="50" y2="65"/>
   <line x1="50" y1="65" x2="75" y2="60"/>
   <line x1="75" y1="60" x2="92" y2="58"/>
 </g>
-<g id="ico-bicyclecrunch" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <line x1="4" y1="85" x2="96" y2="85" stroke-width="2" stroke="#3a5a60"/>
-  <circle cx="28" cy="52" r="8" fill="#20393f"/>
+<g id="ico-bicyclecrunch" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="4" y1="85" x2="96" y2="85" stroke-width="2" stroke="var(--line)"/>
+  <circle cx="28" cy="52" r="8" fill="var(--panel2)"/>
   <line x1="35" y1="55" x2="55" y2="63"/>
   <line x1="55" y1="63" x2="45" y2="42"/>
   <line x1="45" y1="42" x2="33" y2="48"/>
@@ -287,9 +453,9 @@
   <line x1="80" y1="68" x2="95" y2="66"/>
   <line x1="35" y1="55" x2="44" y2="42"/>
 </g>
-<g id="ico-skullcrusher" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <rect x="8" y="72" width="84" height="8" rx="3" fill="#20393f" stroke="none"/>
-  <circle cx="23" cy="58" r="9" fill="#20393f"/>
+<g id="ico-skullcrusher" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="8" y="72" width="84" height="8" rx="3" fill="var(--panel2)" stroke="none"/>
+  <circle cx="23" cy="58" r="9" fill="var(--panel2)"/>
   <line x1="31" y1="59" x2="72" y2="61"/>
   <line x1="72" y1="61" x2="86" y2="50"/>
   <line x1="86" y1="50" x2="80" y2="70"/>
@@ -299,32 +465,32 @@
   <line x1="60" y1="32" x2="35" y2="49"/>
   <line x1="20" y1="49" x2="40" y2="47" stroke-width="6"/>
 </g>
-<g id="ico-deadlift" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<g id="ico-deadlift" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <line x1="18" y1="90" x2="82" y2="90" stroke-width="7"/>
-  <circle cx="30" cy="35" r="9" fill="#20393f"/>
+  <circle cx="30" cy="35" r="9" fill="var(--panel2)"/>
   <line x1="38" y1="40" x2="65" y2="60"/>
   <line x1="65" y1="60" x2="60" y2="90"/>
   <line x1="45" y1="45" x2="45" y2="88"/>
   <line x1="56" y1="50" x2="56" y2="88"/>
 </g>
-<g id="ico-kbswing" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="50" cy="20" r="9" fill="#20393f"/>
+<g id="ico-kbswing" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="20" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="29" x2="55" y2="55"/>
   <line x1="55" y1="55" x2="45" y2="90"/>
   <line x1="55" y1="55" x2="65" y2="90"/>
   <line x1="52" y1="35" x2="50" y2="63"/>
-  <circle cx="50" cy="72" r="9" fill="#20393f"/>
+  <circle cx="50" cy="72" r="9" fill="var(--panel2)"/>
 </g>
-<g id="ico-pushup" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <line x1="4" y1="78" x2="96" y2="78" stroke-width="2" stroke="#3a5a60"/>
-  <circle cx="15" cy="40" r="8" fill="#20393f"/>
+<g id="ico-pushup" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="4" y1="78" x2="96" y2="78" stroke-width="2" stroke="var(--line)"/>
+  <circle cx="15" cy="40" r="8" fill="var(--panel2)"/>
   <line x1="23" y1="42" x2="80" y2="45"/>
   <line x1="80" y1="45" x2="95" y2="48"/>
   <line x1="35" y1="43" x2="35" y2="70"/>
   <line x1="57" y1="44" x2="57" y2="72"/>
 </g>
-<g id="ico-stretch" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+<g id="ico-stretch" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="var(--panel2)"/>
   <line x1="50" y1="24" x2="50" y2="58"/>
   <line x1="50" y1="58" x2="40" y2="90"/>
   <line x1="50" y1="58" x2="60" y2="90"/>
@@ -339,8 +505,16 @@
   <h1>7-Day Muscle Building Plan</h1>
   <p>Strength &amp; muscle-building program · Focus: overall muscle mass + biceps &amp; triceps</p>
   <div class="modes" id="modes">
-    <button class="mode-pill" type="button" data-mode="beginner">Beginner</button>
-    <button class="mode-pill" type="button" data-mode="medium">Medium</button>
+    <button class="mode-pill" type="button" data-mode="beginner" aria-pressed="true">Beginner</button>
+    <button class="mode-pill" type="button" data-mode="medium" aria-pressed="false">Medium</button>
+  </div>
+  <div class="theme-control" id="themeControl" role="group" aria-label="Color theme">
+    <button class="theme-seg" type="button" data-theme-choice="auto" aria-pressed="true" aria-label="Theme: Auto (follow device)">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M12 3a9 9 0 0 0 0 18"/></svg>Auto</button>
+    <button class="theme-seg" type="button" data-theme-choice="light" aria-pressed="false" aria-label="Theme: Light">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>Light</button>
+    <button class="theme-seg" type="button" data-theme-choice="dark" aria-pressed="false" aria-label="Theme: Dark">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A8 8 0 1 1 11.2 3a6 6 0 0 0 9.8 9.8z"/></svg>Dark</button>
   </div>
   <nav id="tabs"></nav>
 </header>
@@ -356,6 +530,8 @@
 <!-- DAY 1 -->
 <section class="day" id="day1">
   <div class="day-title">Push <span>Chest, Shoulders, Triceps</span></div>
+
+  <div class="day-progress" id="dp1" role="status" aria-live="polite"><span class="dp-count">0/0 done</span><div class="dp-bar"><div class="dp-fill" style="width:0%"></div></div></div>
 
   <div class="exercises" id="ex1"></div>
 
@@ -445,6 +621,8 @@
 <section class="day" id="day2">
   <div class="day-title">Pull <span>Back, Biceps</span></div>
 
+  <div class="day-progress" id="dp2" role="status" aria-live="polite"><span class="dp-count">0/0 done</span><div class="dp-bar"><div class="dp-fill" style="width:0%"></div></div></div>
+
   <div class="exercises" id="ex2"></div>
 
   <h3 class="section">Diet &ndash; Tue</h3>
@@ -523,6 +701,8 @@
 <section class="day" id="day3">
   <div class="day-title">Legs + Core</div>
 
+  <div class="day-progress" id="dp3" role="status" aria-live="polite"><span class="dp-count">0/0 done</span><div class="dp-bar"><div class="dp-fill" style="width:0%"></div></div></div>
+
   <div class="exercises" id="ex3"></div>
 
   <h3 class="section">Diet &ndash; Wed</h3>
@@ -596,6 +776,8 @@
 <!-- DAY 4 -->
 <section class="day" id="day4">
   <div class="day-title">Cardio + Abs <span>Active recovery</span></div>
+
+  <div class="day-progress" id="dp4" role="status" aria-live="polite"><span class="dp-count">0/0 done</span><div class="dp-bar"><div class="dp-fill" style="width:0%"></div></div></div>
 
   <div class="exercises" id="ex4"></div>
 
@@ -676,6 +858,8 @@
 <section class="day" id="day5">
   <div class="day-title">Arms Specialization <span>Biceps &amp; Triceps</span></div>
 
+  <div class="day-progress" id="dp5" role="status" aria-live="polite"><span class="dp-count">0/0 done</span><div class="dp-bar"><div class="dp-fill" style="width:0%"></div></div></div>
+
   <div class="exercises" id="ex5"></div>
 
   <h3 class="section">Diet &ndash; Fri</h3>
@@ -744,6 +928,8 @@
 <!-- DAY 6 -->
 <section class="day" id="day6">
   <div class="day-title">Full Body Functional</div>
+
+  <div class="day-progress" id="dp6" role="status" aria-live="polite"><span class="dp-count">0/0 done</span><div class="dp-bar"><div class="dp-fill" style="width:0%"></div></div></div>
 
   <div class="exercises" id="ex6"></div>
 
@@ -814,6 +1000,8 @@
 <!-- DAY 7 -->
 <section class="day" id="day7">
   <div class="day-title">Rest / Active Recovery</div>
+
+  <div class="day-progress" id="dp7" role="status" aria-live="polite"><span class="dp-count">0/0 done</span><div class="dp-bar"><div class="dp-fill" style="width:0%"></div></div></div>
 
   <div class="exercises" id="ex7"></div>
 
@@ -886,9 +1074,21 @@
 
 </main>
 
+<p class="privacy-note">Your workout checkmarks and logged sets are stored only on this device (offline). Clearing this site's data will erase them.</p>
+
 <footer>
   This is general fitness and nutrition information, not medical advice. Please consult your doctor before starting a new exercise or diet program.
 </footer>
+
+<!-- Part D: single shared rest timer. Direct child of <body>, sibling to <main>,
+     position:fixed — unaffected by showDay()/renderMode() so it is present on all days. -->
+<div class="rest-timer" role="region" aria-label="Rest timer">
+  <span class="rt-display" aria-hidden="true">1:30</span>
+  <span class="rt-status visually-hidden" role="status" aria-live="polite"></span>
+  <button type="button" class="rt-btn rt-primary" id="rtStart90" aria-label="Start 90 second rest timer">Rest 90s</button>
+  <button type="button" class="rt-btn" id="rtStart60" aria-label="Start 60 second rest timer">60s</button>
+  <button type="button" class="rt-btn" id="rtCancel" aria-label="Cancel rest timer">Cancel</button>
+</div>
 
 <script>
   // ===== Exercise data for both modes (diet is shared and lives in the DOM) =====
@@ -1009,8 +1209,129 @@
   var frameworkEl = document.getElementById('framework');
   var modesEl = document.getElementById('modes');
   var currentMode = 'beginner';
+  var activeDayId = 'day1';   // tracked for progress refresh only; set at init + showDay()
 
-  function exerciseCard(ex){
+  // ===== Shared foundations =====
+  // Safe-storage wrappers: private mode / disabled storage / quota never crash.
+  function readStore(key, fallback){
+    try { var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+    catch(e){ return fallback; }
+  }
+  function writeStore(key, value){
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+    catch(e){ return false; }   // quota / private mode: degrade silently
+  }
+  // slug(name): decode HTML entities via a throwaway element (so every entity the
+  // markup can contain is handled), lowercase, non-alphanumerics -> single dash.
+  function slug(name){
+    var t = document.createElement('textarea');
+    t.innerHTML = String(name);
+    return t.value.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+  }
+  // decodedName(ex): decoded, human-readable plain text of ex.name (no slugging).
+  function decodedName(ex){
+    var t = document.createElement('textarea');
+    t.innerHTML = String(ex.name);
+    return t.value;
+  }
+  // escAttr(s): escape for safe insertion into a double-quoted HTML attribute.
+  // Note: exId is composed only of [a-z0-9|-] (mode/dayId literals + slug output),
+  // so it is attribute-safe by construction; escAttr is required only for
+  // decodedName(ex), which can contain " / & / <.
+  function escAttr(s){
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  // localISODate(): LOCAL calendar date, never UTC (toISOString would roll over
+  // at the wrong local hour).
+  function localISODate(d){
+    d = d || new Date();
+    var y = d.getFullYear();
+    var m = ('0' + (d.getMonth()+1)).slice(-2);
+    var day = ('0' + d.getDate()).slice(-2);
+    return y + '-' + m + '-' + day;
+  }
+
+  // ===== Part D: progress (completion) data model =====
+  function getProgress(){ return readStore('fitnessProgress', {}); }
+  function isDone(exId, mode, dayId){
+    var p = getProgress(), d = localISODate();
+    return !!(p[d] && p[d][mode] && p[d][mode][dayId] && p[d][mode][dayId][exId]);
+  }
+  function setDone(exId, mode, dayId, done){
+    var p = getProgress(), d = localISODate();
+    p[d] = p[d] || {}; p[d][mode] = p[d][mode] || {};
+    p[d][mode][dayId] = p[d][mode][dayId] || {};
+    if(done){ p[d][mode][dayId][exId] = true; }
+    else { delete p[d][mode][dayId][exId]; }
+    writeStore('fitnessProgress', p);
+  }
+  function updateDayProgress(dayId, mode){
+    var idx = days.indexOf(dayId);
+    if(idx === -1){ return; }
+    var node = document.getElementById('dp' + (idx + 1));
+    if(!node){ return; }
+    var list = (PLAN[mode] && PLAN[mode][dayId]) || [];
+    var total = list.length;
+    var done = 0, i;
+    for(i = 0; i < total; i++){
+      var exId = mode + '|' + dayId + '|' + slug(list[i].name);
+      if(isDone(exId, mode, dayId)){ done++; }
+    }
+    var pct = total ? Math.round(done / total * 100) : 0;
+    var countEl = node.querySelector('.dp-count');
+    var fillEl = node.querySelector('.dp-fill');
+    if(countEl){ countEl.textContent = done + '/' + total + ' done'; }
+    if(fillEl){ fillEl.style.width = pct + '%'; }
+  }
+
+  // ===== Part E: log data model + single-source render helper =====
+  function getLog(){ return readStore('fitnessLog', {}); }
+  function lastEntry(exSlug){ var a = getLog()[exSlug]; return a && a.length ? a[a.length-1] : null; }
+  function addEntry(exSlug, entry){
+    var log = getLog(); (log[exSlug] = log[exSlug] || []).push(entry);
+    writeStore('fitnessLog', log);
+  }
+  function fmtEntry(e){ return e.weight + 'kg × ' + e.reps + (e.sets ? ' × ' + e.sets : ''); }
+  function sparklineSVG(entries){
+    var i, w = [];
+    for(i = 0; i < entries.length; i++){ w.push(entries[i].weight); }
+    var min = Math.min.apply(null, w), max = Math.max.apply(null, w);
+    var range = (max - min) || 1;
+    var n = w.length;
+    var pts = [];
+    for(i = 0; i < n; i++){
+      var x = n > 1 ? Math.round(i / (n - 1) * 100) : 0;
+      var y = Math.round(22 - ((w[i] - min) / range) * 20);   // 2..22 inside 24 viewBox
+      pts.push(x + ',' + y);
+    }
+    var label = 'Weight trend, ' + w[0] + 'kg to ' + w[n-1] + 'kg';
+    return '<svg class="log-spark" viewBox="0 0 100 24" role="img" aria-label="' + escAttr(label) + '">'
+      + '<polyline fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="' + pts.join(' ') + '"/>'
+      + '</svg>';
+  }
+  // The ONLY place that builds hint + history + sparkline markup.
+  function logSectionHTML(exSlug){
+    var entries = getLog()[exSlug] || [];
+    if(!entries.length){ return ''; }
+    var last = entries[entries.length - 1];
+    var html = '<p class="ex-last">Last time: ' + fmtEntry(last) + '</p>';
+    html += '<ul class="log-history">' +
+            entries.slice(-5).reverse().map(function(e){
+              return '<li>' + e.date + ' · ' + fmtEntry(e) + '</li>';
+            }).join('') + '</ul>';
+    if(entries.length >= 2){ html += sparklineSVG(entries.slice(-8)); }
+    return html;
+  }
+
+  function exerciseCard(ex, mode, dayId){
+    var exId = mode + '|' + dayId + '|' + slug(ex.name);
+    var exSlug = slug(ex.name);
+    var domId = 'done-' + exId.replace(/[^a-z0-9]+/g, '-');
+    var done = isDone(exId, mode, dayId);
     var media;
     if(ex.video){
       var vid = ex.video.split('v=')[1];
@@ -1019,13 +1340,29 @@
     } else {
       media = '<span class="no-video">No demo needed</span>';
     }
-    return '<div class="card">'
+    var logger = '<details class="logger"><summary>Log set</summary>'
+      + '<div class="log-form">'
+      + '<div class="log-field"><label for="' + domId + '-w">Weight kg</label>'
+      + '<input type="number" inputmode="decimal" class="log-weight" id="' + domId + '-w" min="0" max="1000" step="0.1"></div>'
+      + '<div class="log-field"><label for="' + domId + '-r">Reps</label>'
+      + '<input type="number" inputmode="numeric" class="log-reps" id="' + domId + '-r" min="1" max="100" step="1"></div>'
+      + '<div class="log-field"><label for="' + domId + '-s">Sets</label>'
+      + '<input type="number" inputmode="numeric" class="log-sets" id="' + domId + '-s" min="1" max="20" step="1"></div>'
+      + '<button type="button" class="log-save" data-ex-slug="' + escAttr(exSlug) + '" aria-describedby="' + domId + '-err">Save</button>'
+      + '</div>'
+      + '<p class="log-error" id="' + domId + '-err" role="alert"></p>'
+      + '<div class="logger-dynamic">' + logSectionHTML(exSlug) + '</div>'
+      + '</details>';
+    return '<div class="card' + (done ? ' done' : '') + '" data-ex-mode="' + mode + '" data-ex-day="' + dayId + '">'
+      + '<label class="ex-done-label" for="' + domId + '" aria-label="Mark ' + escAttr(decodedName(ex)) + ' done">'
+      + '<input type="checkbox" class="ex-done" id="' + domId + '" data-ex-id="' + exId + '"' + (done ? ' checked' : '') + '></label>'
       + '<div class="icon-wrap"><svg viewBox="0 0 100 100"><use href="#' + ex.icon + '" xlink:href="#' + ex.icon + '"/></svg></div>'
       + '<div class="card-body">'
       + '<p class="ex-name">' + ex.name + '</p>'
       + '<p class="ex-sets">' + ex.sets + '</p>'
       + '<p class="ex-weight">' + ex.weight + '</p>'
       + media
+      + logger
       + '</div></div>';
   }
 
@@ -1035,12 +1372,16 @@
     var data = PLAN[mode];
     days.forEach(function(id, i){
       var container = document.getElementById('ex' + (i + 1));
-      container.innerHTML = (data[id] || []).map(exerciseCard).join('');
+      container.innerHTML = (data[id] || []).map(function(ex){ return exerciseCard(ex, mode, id); }).join('');
     });
     frameworkEl.innerHTML = FRAMEWORK[mode];
     Array.prototype.forEach.call(modesEl.children, function(b){
-      b.classList.toggle('active', b.getAttribute('data-mode') === mode);
+      var on = b.getAttribute('data-mode') === mode;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
+    // Repaint every day's progress (counts differ per mode); runs on init + mode switch.
+    days.forEach(function(id){ updateDayProgress(id, mode); });
   }
 
   function buildTabs(){
@@ -1061,10 +1402,14 @@
   }
 
   function showDay(id, btn){
+    activeDayId = id;
     days.forEach(function(d){ document.getElementById(d).classList.remove('active'); });
     document.getElementById(id).classList.add('active');
-    Array.prototype.forEach.call(tabsEl.children, function(b){ b.classList.remove('active'); });
-    if(btn){ btn.classList.add('active'); }
+    Array.prototype.forEach.call(tabsEl.children, function(b){
+      b.classList.remove('active');
+      b.removeAttribute('aria-current');
+    });
+    if(btn){ btn.classList.add('active'); btn.setAttribute('aria-current', 'true'); }
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
@@ -1104,6 +1449,183 @@
     }
   });
 
+  // ===== Part D: delegated done-toggle handler =====
+  document.addEventListener('change', function(e){
+    var cb = e.target.closest ? e.target.closest('.ex-done') : null;
+    if(!cb){ return; }
+    var card = cb.closest('.card');
+    if(!card){ return; }
+    var exId  = cb.getAttribute('data-ex-id');
+    var mode  = card.getAttribute('data-ex-mode');
+    var dayId = card.getAttribute('data-ex-day');
+    setDone(exId, mode, dayId, cb.checked);
+    card.classList.toggle('done', cb.checked);
+    updateDayProgress(dayId, mode);
+  });
+
+  // ===== Part E: delegated log-save handler =====
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('.log-save') : null;
+    if(!btn){ return; }
+    var card = btn.closest('.card');
+    if(!card){ return; }
+    var exSlug = btn.getAttribute('data-ex-slug');
+    var errEl = card.querySelector('.log-error');
+    var wEl = card.querySelector('.log-weight');
+    var rEl = card.querySelector('.log-reps');
+    var sEl = card.querySelector('.log-sets');
+    function fail(msg){
+      if(errEl){ errEl.textContent = msg; errEl.classList.add('show'); }
+    }
+    var weight = parseFloat(wEl ? wEl.value : '');
+    if(!isFinite(weight) || weight < 0 || weight > 1000){ fail('Enter a weight 0–1000'); return; }
+    var reps = parseInt(rEl ? rEl.value : '', 10);
+    if(!isFinite(reps) || reps < 1 || reps > 100){ fail('Enter reps 1–100'); return; }
+    var sets = null;
+    var rawSets = sEl ? String(sEl.value).trim() : '';
+    if(rawSets !== ''){
+      sets = parseInt(rawSets, 10);
+      if(!isFinite(sets) || sets < 1 || sets > 20){ fail('Enter sets 1–20 (or leave blank)'); return; }
+    }
+    weight = Math.round(weight * 10) / 10;   // enforce 1-decimal precision
+    addEntry(exSlug, { date: localISODate(), weight: weight, reps: reps, sets: sets });
+    var dyn = card.querySelector('.logger-dynamic');
+    if(dyn){ dyn.innerHTML = logSectionHTML(exSlug); }   // SAME single-source helper
+    if(wEl){ wEl.value = ''; } if(rEl){ rEl.value = ''; } if(sEl){ sEl.value = ''; }
+    if(errEl){ errEl.textContent = ''; errEl.classList.remove('show'); }
+  });
+
+  // ===== Part B: theme resolution + apply =====
+  function getStoredTheme(){
+    try { var t = localStorage.getItem('fitnessTheme');
+          return (t==='light'||t==='dark'||t==='auto') ? t : 'auto'; }
+    catch(e){ return 'auto'; }
+  }
+  function systemPrefersDark(){
+    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  function resolveTheme(choice){
+    if(choice === 'light' || choice === 'dark'){ return choice; }
+    return systemPrefersDark() ? 'dark' : 'light';
+  }
+  function updateThemeColorMeta(resolved){
+    var meta = document.getElementById('theme-color-meta');
+    if(meta){ meta.setAttribute('content', resolved === 'dark' ? '#0f1c20' : '#f4f7f6'); }
+  }
+  var themeControlEl = document.getElementById('themeControl');
+  function reflectThemeControl(choice){
+    if(!themeControlEl){ return; }
+    Array.prototype.forEach.call(themeControlEl.children, function(b){
+      var on = b.getAttribute('data-theme-choice') === choice;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  function applyTheme(choice){
+    var resolved = resolveTheme(choice);
+    document.documentElement.setAttribute('data-theme', resolved);
+    updateThemeColorMeta(resolved);
+    reflectThemeControl(choice);
+  }
+  if(themeControlEl){
+    Array.prototype.forEach.call(themeControlEl.children, function(b){
+      b.addEventListener('click', function(){
+        var choice = b.getAttribute('data-theme-choice');
+        writeStore('fitnessTheme', choice);
+        applyTheme(choice);
+      });
+    });
+  }
+  // Live-follow the OS while in Auto.
+  if(window.matchMedia){
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var onSchemeChange = function(){ if(getStoredTheme() === 'auto'){ applyTheme('auto'); } };
+    if(mq.addEventListener){ mq.addEventListener('change', onSchemeChange); }
+    else if(mq.addListener){ mq.addListener(onSchemeChange); }   // older Safari
+  }
+
+  // ===== Part D: rest timer (single shared, module-scoped state) =====
+  var rtRemaining = 0;
+  var rtIntervalId = null;
+  var rtStartSeconds = 0;
+  var rtAudioCtx = null;
+  var rtDisplayEl = document.querySelector('.rt-display');
+  var rtStatusEl = document.querySelector('.rt-status');
+  function rtFmt(sec){
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return m + ':' + ('0' + s).slice(-2);
+  }
+  function rtSay(msg){ if(rtStatusEl){ rtStatusEl.textContent = msg; } }
+  function rtRender(){ if(rtDisplayEl){ rtDisplayEl.textContent = rtFmt(rtRemaining); } }
+  function rtBeep(){
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC){ return; }
+      if(!rtAudioCtx){ rtAudioCtx = new AC(); }
+      if(rtAudioCtx.resume){ rtAudioCtx.resume(); }
+      var osc = rtAudioCtx.createOscillator();
+      var gain = rtAudioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      var t0 = rtAudioCtx.currentTime;
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.3, t0 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.2);
+      osc.connect(gain); gain.connect(rtAudioCtx.destination);
+      osc.start(t0); osc.stop(t0 + 0.22);
+    } catch(e){ /* audio blocked/unsupported: vibrate + visual still fire */ }
+  }
+  function rtStop(){
+    if(rtIntervalId){ clearInterval(rtIntervalId); rtIntervalId = null; }
+  }
+  function rtStart(seconds){
+    rtStop();                       // double-start guard
+    rtStartSeconds = seconds;
+    rtRemaining = seconds;
+    rtRender();
+    rtSay('Rest timer started, ' + seconds + ' seconds');
+    // Prime the audio context on this user gesture to satisfy autoplay policy.
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(AC && !rtAudioCtx){ rtAudioCtx = new AC(); }
+      if(rtAudioCtx && rtAudioCtx.resume){ rtAudioCtx.resume(); }
+    } catch(e){}
+    rtIntervalId = setInterval(function(){
+      rtRemaining--;
+      rtRender();
+      if(rtRemaining === 30 && rtStartSeconds > 30){ rtSay('30 seconds left'); }
+      if(rtRemaining === 10 && rtStartSeconds > 10){ rtSay('10 seconds left'); }
+      if(rtRemaining <= 0){
+        rtStop();
+        rtSay('Rest over');
+        rtBeep();
+        try { if(navigator.vibrate){ navigator.vibrate([200,100,200]); } } catch(e){}
+        if(rtDisplayEl){
+          rtDisplayEl.textContent = '0:00';
+          rtDisplayEl.classList.add('flash');
+          setTimeout(function(){ if(rtDisplayEl){ rtDisplayEl.classList.remove('flash'); rtDisplayEl.textContent = rtFmt(rtStartSeconds); } }, 1200);
+        }
+      }
+    }, 1000);
+  }
+  function rtCancel(){
+    rtStop();
+    rtSay('Rest cancelled');
+    rtRemaining = 0;
+    if(rtDisplayEl){ rtDisplayEl.textContent = rtFmt(rtStartSeconds || 90); }
+  }
+  (function wireRestTimer(){
+    var b90 = document.getElementById('rtStart90');
+    var b60 = document.getElementById('rtStart60');
+    var bc = document.getElementById('rtCancel');
+    if(b90){ b90.addEventListener('click', function(){ rtStart(90); }); }
+    if(b60){ b60.addEventListener('click', function(){ rtStart(60); }); }
+    if(bc){ bc.addEventListener('click', rtCancel); }
+    rtStartSeconds = 90;
+    if(rtDisplayEl){ rtDisplayEl.textContent = rtFmt(90); }   // default 90s display
+  })();
+
   // ===== Init: restore persisted mode (default beginner) before first paint of day content =====
   var savedMode = 'beginner';
   try {
@@ -1111,17 +1633,31 @@
     if(stored === 'beginner' || stored === 'medium'){ savedMode = stored; }
   } catch(e) {}
 
+  // Theme: data-theme was already set before paint by the head script. Here we
+  // sync the managed meta + segmented control aria-pressed (idempotent apply).
+  applyTheme(getStoredTheme());
+
+  activeDayId = todayDayId();   // sane value before render (not used for per-card lookup)
+
   buildTabs();
-  renderMode(savedMode);
+  renderMode(savedMode);        // also repaints all 7 days' progress
   var initialId = todayDayId();
   var initialIdx = days.indexOf(initialId);
   var initialBtn = tabsEl.children[initialIdx] || null;
   showDay(initialId, initialBtn);
 
-  // ===== PWA service worker registration =====
+  // ===== PWA service worker registration — update-aware, one-shot reload =====
   if('serviceWorker' in navigator){
+    var refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if(refreshing){ return; }     // guard: reload at most once per update
+      refreshing = true;
+      window.location.reload();
+    });
     window.addEventListener('load', function(){
-      navigator.serviceWorker.register('./service-worker.js');
+      navigator.serviceWorker.register('./service-worker.js').catch(function(){
+        /* registration failed: app still works online, just no offline cache */
+      });
     });
   }
 </script>
