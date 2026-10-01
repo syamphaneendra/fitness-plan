@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fitness Plan">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#132226">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<title>7-Day Muscle Building Plan</title>
+<style>
+  :root{
+    --bg:#132226;
+    --panel:#1b3238;
+    --panel2:#20393f;
+    --accent:#3fb28f;
+    --accent2:#e8985a;
+    --text:#eef3f2;
+    --muted:#9db3ae;
+    --line:#2c454b;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  body{padding-bottom:40px;}
+
+  header{position:sticky; top:0; z-index:20; background:var(--bg);
+    padding:14px 16px 0 16px; border-bottom:1px solid var(--line);}
+  header h1{font-size:19px; margin:0 0 2px 0; font-weight:700; letter-spacing:-0.2px;}
+  header p{margin:0 0 12px 0; font-size:12.5px; color:var(--muted); line-height:1.4;}
+
+  .modes{display:flex; gap:6px; padding-bottom:10px;}
+  .mode-pill{flex:0 0 auto; background:transparent; border:1px solid var(--line); color:var(--muted);
+    padding:7px 15px; border-radius:20px; font-size:13px; font-weight:600; font-family:inherit;}
+  .mode-pill.active{background:var(--accent); border-color:var(--accent); color:#0d1f1c;}
+
+  nav{display:flex; gap:6px; overflow-x:auto; padding-bottom:10px; scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav button{flex:0 0 auto; background:transparent; border:1px solid var(--line); color:var(--muted);
+    padding:7px 13px; border-radius:20px; font-size:13px; font-weight:600; font-family:inherit;}
+  nav button.active{background:var(--accent); border-color:var(--accent); color:#0d1f1c;}
+
+  main{padding:16px;}
+  .day{display:none;}
+  .day.active{display:block; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .day-title{font-size:16px; font-weight:700; margin:2px 0 12px 0;}
+  .day-title span{display:block; font-size:12px; font-weight:500; color:var(--muted); margin-top:2px;}
+
+  .card{background:var(--panel); border-radius:14px; padding:12px 14px; margin-bottom:10px;
+    display:flex; align-items:center; gap:12px; border:1px solid var(--line);}
+  .icon-wrap{flex:0 0 auto; width:56px; height:56px; background:var(--panel2); border-radius:12px;
+    display:flex; align-items:center; justify-content:center;}
+  .icon-wrap svg{width:38px; height:38px;}
+  .card-body{flex:1; min-width:0;}
+  .ex-name{font-size:14.5px; font-weight:600; margin:0 0 2px 0;}
+  .ex-sets{font-size:12.5px; color:var(--accent2); font-weight:600; margin:0 0 2px 0;}
+  .ex-weight{font-size:11.5px; color:var(--muted); margin:0 0 6px 0;}
+  .meal-card{background:var(--panel); border-radius:14px; padding:12px 14px; margin-bottom:10px; border:1px solid var(--line);}
+  .meal-tag{display:inline-block; font-size:10.5px; font-weight:700; color:#0d1f1c; background:var(--accent2);
+    padding:2px 8px; border-radius:6px; margin-bottom:6px;}
+  .meal-name{font-size:14.5px; font-weight:700; margin:0 0 4px 0;}
+  .meal-desc{font-size:12.5px; color:var(--text); margin:0 0 8px 0; line-height:1.45;}
+  details.recipe{font-size:12px; color:var(--muted);}
+  details.recipe summary{cursor:pointer; color:var(--accent); font-weight:700; font-size:12px; list-style:none;}
+  details.recipe summary::-webkit-details-marker{display:none;}
+  details.recipe summary::before{content:"▸ "; }
+  details.recipe[open] summary::before{content:"▾ "; }
+  details.recipe .r-ing{margin:8px 0 4px 0; color:var(--text);}
+  details.recipe .r-ing b, details.recipe .r-steps b{color:var(--accent2);}
+  details.recipe ol{margin:4px 0 0 0; padding-left:18px; color:var(--text);}
+  details.recipe ol li{margin-bottom:4px; line-height:1.4;}
+  .watch{display:inline-flex; align-items:center; gap:6px; background:var(--accent); color:#0d1f1c;
+    font-size:12.5px; font-weight:700; padding:6px 11px; border-radius:8px; text-decoration:none;}
+  .url{display:block; font-size:10.5px; color:var(--muted); margin-top:5px; word-break:break-all;}
+  .no-video{font-size:12.5px; color:var(--muted);}
+
+  h3.section{font-size:13.5px; color:var(--accent2); margin:20px 0 8px 0; font-weight:700;}
+  table{width:100%; border-collapse:collapse; font-size:12.5px; background:var(--panel);
+    border-radius:12px; overflow:hidden; border:1px solid var(--line);}
+  th{background:var(--panel2); text-align:left; padding:8px 10px; color:var(--accent); font-size:11.5px;}
+  td{padding:8px 10px; border-top:1px solid var(--line); vertical-align:top;}
+  td.meal{font-weight:700; width:24%; color:var(--accent2);}
+
+  .note{background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:12px 14px;
+    font-size:12.5px; line-height:1.5; margin-top:16px;}
+  .note b{color:var(--accent2);}
+  .framework{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px;
+    margin-bottom:18px; font-size:12.5px; line-height:1.55;}
+  .framework b{color:var(--accent);}
+  .framework ul{margin:8px 0 0 0; padding-left:18px;}
+  .framework li{margin-bottom:6px;}
+  footer{padding:18px 16px 0 16px; font-size:11px; color:var(--muted); line-height:1.5;}
+  .install-tip{margin:14px 16px 0 16px; background:var(--panel2); border:1px dashed var(--accent);
+    border-radius:12px; padding:10px 14px; font-size:12px; color:var(--muted);}
+  .install-tip b{color:var(--text);}
+</style>
+</head>
+<body>
+
+<!-- ============ ICON LIBRARY (reused via <use>) ============ -->
+<svg width="0" height="0" style="position:absolute">
+<defs>
+<g id="ico-press" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="8" y="72" width="84" height="8" rx="3" fill="#20393f" stroke="none"/>
+  <circle cx="22" cy="58" r="9" fill="#20393f"/>
+  <line x1="30" y1="58" x2="70" y2="60"/>
+  <line x1="70" y1="60" x2="86" y2="48"/>
+  <line x1="86" y1="48" x2="80" y2="70"/>
+  <line x1="40" y1="59" x2="40" y2="25"/>
+  <line x1="55" y1="59" x2="55" y2="25"/>
+  <line x1="25" y1="25" x2="70" y2="25" stroke-width="7"/>
+</g>
+<g id="ico-ohp" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+  <line x1="50" y1="24" x2="50" y2="55"/>
+  <line x1="50" y1="55" x2="38" y2="90"/>
+  <line x1="50" y1="55" x2="62" y2="90"/>
+  <line x1="50" y1="28" x2="35" y2="8"/>
+  <line x1="50" y1="28" x2="65" y2="8"/>
+  <line x1="25" y1="6" x2="75" y2="6" stroke-width="7"/>
+</g>
+<g id="ico-dip" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="22" y1="18" x2="22" y2="72"/>
+  <line x1="78" y1="18" x2="78" y2="72"/>
+  <circle cx="50" cy="30" r="9" fill="#20393f"/>
+  <line x1="50" y1="39" x2="50" y2="65"/>
+  <line x1="50" y1="45" x2="22" y2="45"/>
+  <line x1="50" y1="45" x2="78" y2="45"/>
+  <line x1="50" y1="65" x2="62" y2="80"/>
+  <line x1="62" y1="80" x2="56" y2="95"/>
+</g>
+<g id="ico-pushdown" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+  <line x1="50" y1="24" x2="50" y2="58" stroke-dasharray="0"/>
+  <line x1="50" y1="58" x2="42" y2="90"/>
+  <line x1="50" y1="58" x2="58" y2="90"/>
+  <line x1="50" y1="0" x2="50" y2="40" stroke-width="3" stroke="#9db3ae"/>
+  <line x1="50" y1="30" x2="50" y2="45"/>
+  <line x1="50" y1="45" x2="50" y2="72"/>
+</g>
+<g id="ico-lateral" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+  <line x1="50" y1="24" x2="50" y2="58"/>
+  <line x1="50" y1="58" x2="42" y2="90"/>
+  <line x1="50" y1="58" x2="58" y2="90"/>
+  <line x1="50" y1="30" x2="20" y2="30"/>
+  <line x1="50" y1="30" x2="80" y2="30"/>
+  <circle cx="20" cy="30" r="6" fill="#20393f"/>
+  <circle cx="80" cy="30" r="6" fill="#20393f"/>
+</g>
+<g id="ico-pullup" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="18" y1="8" x2="82" y2="8" stroke-width="7"/>
+  <line x1="35" y1="8" x2="50" y2="35"/>
+  <line x1="65" y1="8" x2="50" y2="35"/>
+  <circle cx="50" cy="42" r="9" fill="#20393f"/>
+  <line x1="50" y1="51" x2="50" y2="75"/>
+  <line x1="50" y1="75" x2="43" y2="95"/>
+  <line x1="50" y1="75" x2="57" y2="95"/>
+</g>
+<g id="ico-row" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="25" cy="30" r="9" fill="#20393f"/>
+  <line x1="32" y1="36" x2="66" y2="55"/>
+  <line x1="66" y1="55" x2="62" y2="90"/>
+  <line x1="66" y1="55" x2="78" y2="88"/>
+  <line x1="45" y1="47" x2="33" y2="68"/>
+  <circle cx="33" cy="68" r="6" fill="#20393f"/>
+</g>
+<g id="ico-curl" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+  <line x1="50" y1="24" x2="50" y2="58"/>
+  <line x1="50" y1="58" x2="42" y2="90"/>
+  <line x1="50" y1="58" x2="58" y2="90"/>
+  <line x1="55" y1="28" x2="60" y2="55"/>
+  <line x1="60" y1="55" x2="45" y2="30"/>
+  <circle cx="45" cy="30" r="6" fill="#20393f"/>
+</g>
+<g id="ico-latpull" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="30" y1="85" x2="70" y2="85"/>
+  <circle cx="50" cy="25" r="9" fill="#20393f"/>
+  <line x1="50" y1="34" x2="50" y2="78"/>
+  <line x1="50" y1="38" x2="30" y2="14"/>
+  <line x1="50" y1="38" x2="70" y2="14"/>
+  <line x1="18" y1="12" x2="82" y2="12" stroke-width="7"/>
+  <line x1="50" y1="78" x2="40" y2="94"/>
+  <line x1="50" y1="78" x2="60" y2="94"/>
+</g>
+<g id="ico-squat" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="28" y1="24" x2="72" y2="24" stroke-width="7"/>
+  <circle cx="50" cy="14" r="9" fill="#20393f"/>
+  <line x1="50" y1="23" x2="50" y2="55"/>
+  <line x1="50" y1="55" x2="35" y2="70"/>
+  <line x1="50" y1="55" x2="65" y2="70"/>
+  <line x1="35" y1="70" x2="38" y2="95"/>
+  <line x1="65" y1="70" x2="62" y2="95"/>
+</g>
+<g id="ico-lunge" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+  <line x1="50" y1="24" x2="50" y2="55"/>
+  <line x1="50" y1="30" x2="42" y2="50"/>
+  <line x1="50" y1="30" x2="58" y2="50"/>
+  <line x1="50" y1="55" x2="35" y2="65"/>
+  <line x1="35" y1="65" x2="35" y2="92"/>
+  <line x1="50" y1="55" x2="72" y2="75"/>
+  <line x1="72" y1="75" x2="84" y2="93"/>
+</g>
+<g id="ico-plank" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="4" y1="80" x2="96" y2="80" stroke-width="2" stroke="#3a5a60"/>
+  <circle cx="16" cy="45" r="8" fill="#20393f"/>
+  <line x1="23" y1="45" x2="82" y2="48"/>
+  <line x1="82" y1="48" x2="95" y2="50"/>
+  <line x1="30" y1="47" x2="30" y2="70"/>
+  <line x1="30" y1="70" x2="46" y2="70"/>
+</g>
+<g id="ico-legpress" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="14" y1="26" x2="14" y2="68" stroke-width="6"/>
+  <circle cx="26" cy="33" r="9" fill="#20393f"/>
+  <line x1="26" y1="42" x2="45" y2="58"/>
+  <line x1="45" y1="58" x2="66" y2="53"/>
+  <line x1="66" y1="53" x2="86" y2="48"/>
+  <line x1="86" y1="28" x2="86" y2="70" stroke-width="7"/>
+</g>
+<g id="ico-calf" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+  <line x1="50" y1="24" x2="50" y2="58"/>
+  <line x1="50" y1="30" x2="40" y2="50"/>
+  <line x1="50" y1="30" x2="60" y2="50"/>
+  <line x1="50" y1="58" x2="42" y2="88"/>
+  <line x1="50" y1="58" x2="58" y2="88"/>
+  <line x1="38" y1="88" x2="47" y2="94"/>
+  <line x1="53" y1="88" x2="62" y2="94"/>
+</g>
+<g id="ico-walk" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+  <line x1="50" y1="24" x2="50" y2="55"/>
+  <line x1="50" y1="55" x2="66" y2="72"/>
+  <line x1="66" y1="72" x2="70" y2="95"/>
+  <line x1="50" y1="55" x2="34" y2="68"/>
+  <line x1="34" y1="68" x2="28" y2="95"/>
+  <line x1="50" y1="30" x2="34" y2="45"/>
+  <line x1="50" y1="30" x2="63" y2="48"/>
+</g>
+<g id="ico-twist" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="15" y1="92" x2="85" y2="92" stroke-width="2" stroke="#3a5a60"/>
+  <circle cx="45" cy="30" r="9" fill="#20393f"/>
+  <line x1="50" y1="38" x2="52" y2="70"/>
+  <line x1="52" y1="70" x2="70" y2="76"/>
+  <line x1="70" y1="76" x2="86" y2="68"/>
+  <line x1="48" y1="46" x2="25" y2="56"/>
+  <line x1="48" y1="46" x2="33" y2="62"/>
+</g>
+<g id="ico-hanglegraise" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="18" y1="8" x2="82" y2="8" stroke-width="7"/>
+  <line x1="35" y1="8" x2="50" y2="30"/>
+  <line x1="65" y1="8" x2="50" y2="30"/>
+  <circle cx="50" cy="37" r="9" fill="#20393f"/>
+  <line x1="50" y1="46" x2="50" y2="65"/>
+  <line x1="50" y1="65" x2="75" y2="60"/>
+  <line x1="75" y1="60" x2="92" y2="58"/>
+</g>
+<g id="ico-bicyclecrunch" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="4" y1="85" x2="96" y2="85" stroke-width="2" stroke="#3a5a60"/>
+  <circle cx="28" cy="52" r="8" fill="#20393f"/>
+  <line x1="35" y1="55" x2="55" y2="63"/>
+  <line x1="55" y1="63" x2="45" y2="42"/>
+  <line x1="45" y1="42" x2="33" y2="48"/>
+  <line x1="55" y1="63" x2="80" y2="68"/>
+  <line x1="80" y1="68" x2="95" y2="66"/>
+  <line x1="35" y1="55" x2="44" y2="42"/>
+</g>
+<g id="ico-skullcrusher" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="8" y="72" width="84" height="8" rx="3" fill="#20393f" stroke="none"/>
+  <circle cx="23" cy="58" r="9" fill="#20393f"/>
+  <line x1="31" y1="59" x2="72" y2="61"/>
+  <line x1="72" y1="61" x2="86" y2="50"/>
+  <line x1="86" y1="50" x2="80" y2="70"/>
+  <line x1="45" y1="60" x2="45" y2="32"/>
+  <line x1="60" y1="60" x2="60" y2="32"/>
+  <line x1="45" y1="32" x2="30" y2="47"/>
+  <line x1="60" y1="32" x2="35" y2="49"/>
+  <line x1="20" y1="49" x2="40" y2="47" stroke-width="6"/>
+</g>
+<g id="ico-deadlift" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="18" y1="90" x2="82" y2="90" stroke-width="7"/>
+  <circle cx="30" cy="35" r="9" fill="#20393f"/>
+  <line x1="38" y1="40" x2="65" y2="60"/>
+  <line x1="65" y1="60" x2="60" y2="90"/>
+  <line x1="45" y1="45" x2="45" y2="88"/>
+  <line x1="56" y1="50" x2="56" y2="88"/>
+</g>
+<g id="ico-kbswing" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="20" r="9" fill="#20393f"/>
+  <line x1="50" y1="29" x2="55" y2="55"/>
+  <line x1="55" y1="55" x2="45" y2="90"/>
+  <line x1="55" y1="55" x2="65" y2="90"/>
+  <line x1="52" y1="35" x2="50" y2="63"/>
+  <circle cx="50" cy="72" r="9" fill="#20393f"/>
+</g>
+<g id="ico-pushup" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="4" y1="78" x2="96" y2="78" stroke-width="2" stroke="#3a5a60"/>
+  <circle cx="15" cy="40" r="8" fill="#20393f"/>
+  <line x1="23" y1="42" x2="80" y2="45"/>
+  <line x1="80" y1="45" x2="95" y2="48"/>
+  <line x1="35" y1="43" x2="35" y2="70"/>
+  <line x1="57" y1="44" x2="57" y2="72"/>
+</g>
+<g id="ico-stretch" stroke="#3fb28f" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="50" cy="15" r="9" fill="#20393f"/>
+  <line x1="50" y1="24" x2="50" y2="58"/>
+  <line x1="50" y1="58" x2="40" y2="90"/>
+  <line x1="50" y1="58" x2="60" y2="90"/>
+  <line x1="50" y1="28" x2="35" y2="6"/>
+  <line x1="50" y1="28" x2="65" y2="6"/>
+</g>
+</defs>
+</svg>
+<!-- ============ END ICON LIBRARY ============ -->
+
+<header>
+  <h1>7-Day Muscle Building Plan</h1>
+  <p>Male · 39 yrs · 70 kg · 6 ft · Non-veg (chicken, fish, lamb) · Focus: overall muscle mass + biceps &amp; triceps</p>
+  <div class="modes" id="modes">
+    <button class="mode-pill" type="button" data-mode="beginner">Beginner</button>
+    <button class="mode-pill" type="button" data-mode="medium">Medium</button>
+  </div>
+  <nav id="tabs"></nav>
+</header>
+
+<div class="install-tip">
+  <b>Save this as an app:</b> tap the Share icon in Safari, then "Add to Home Screen." It'll open full-screen like a normal app, no internet needed except when you tap "Watch demo."
+</div>
+
+<main>
+
+<div class="framework" id="framework"></div>
+
+<!-- DAY 1 -->
+<section class="day" id="day1">
+  <div class="day-title">Push <span>Chest, Shoulders, Triceps</span></div>
+
+  <div class="exercises" id="ex1"></div>
+
+  <h3 class="section">Diet &ndash; Day 1</h3>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 1</span>
+    <p class="meal-name">Protein Oats Bowl</p>
+    <p class="meal-desc">40g oats cooked in water/unsweetened milk + 1 tbsp chia/flaxseed + cinnamon + handful berries</p>
+    <details class="recipe" id="recipe-oats-bowl">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 40g rolled oats, 200ml water or unsweetened almond/soy milk, 1 tbsp chia or flaxseed, 1/4 tsp cinnamon, handful mixed berries (blueberries/strawberries)</p>
+      <ol>
+        <li>Bring water or milk to a gentle boil.</li>
+        <li>Stir in oats, reduce heat, simmer 5 min, stirring occasionally.</li>
+        <li>Remove from heat, mix in chia/flaxseed and cinnamon.</li>
+        <li>Top with berries and serve warm.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 2</span>
+    <p class="meal-name">Egg White Scramble</p>
+    <p class="meal-desc">3 egg whites + 1 whole egg, scrambled, with berries on the side</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 3 egg whites + 1 whole egg, pinch salt &amp; pepper, 1 tsp olive oil, handful berries</p>
+      <ol>
+        <li>Whisk eggs with a pinch of salt and pepper.</li>
+        <li>Heat oil in a non-stick pan on medium heat.</li>
+        <li>Pour in eggs, scramble gently for 2&ndash;3 min until just set.</li>
+        <li>Serve with berries on the side.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Lunch</span>
+    <p class="meal-name">Grilled Chicken, Brown Rice &amp; Salad</p>
+    <p class="meal-desc">150g grilled chicken breast, 1 cup brown rice, mixed salad + olive oil</p>
+    <details class="recipe" id="recipe-grilled-chicken">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g chicken breast, 1 tsp olive oil, 1/2 tsp paprika/pepper, 1 cup cooked brown rice, salad (cucumber, tomato, lettuce), drizzle of olive oil</p>
+      <ol>
+        <li>Rub chicken with oil, paprika, salt and pepper.</li>
+        <li>Grill or pan-sear 5&ndash;6 min per side until cooked through (no pink inside).</li>
+        <li>Rest 3 min, then slice.</li>
+        <li>Serve over rice with salad on the side.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Snack</span>
+    <p class="meal-name">Greek Yogurt &amp; Almonds</p>
+    <p class="meal-desc">Greek yogurt (plain, unsweetened) + 10 almonds</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g plain unsweetened Greek yogurt, 10 almonds</p>
+      <ol>
+        <li>Spoon yogurt into a bowl.</li>
+        <li>Top with almonds and eat immediately.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Dinner</span>
+    <p class="meal-name">Baked Fish with Steamed Vegetables</p>
+    <p class="meal-desc">150g baked fish (salmon, mackerel, rohu or pomfret), steamed broccoli + French beans (green beans)</p>
+    <details class="recipe" id="recipe-baked-fish">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g salmon/mackerel/rohu/pomfret, 1 tsp olive oil, lemon juice, salt &amp; pepper, 1 cup broccoli florets + French beans</p>
+      <ol>
+        <li>Preheat oven to 180&deg;C.</li>
+        <li>Rub fish with oil, lemon juice, salt and pepper.</li>
+        <li>Bake 15&ndash;18 min until it flakes easily (grilling/pan-searing works just as well).</li>
+        <li>Meanwhile steam broccoli and French beans 5&ndash;6 min.</li>
+        <li>Serve together.</li>
+      </ol>
+    </details>
+  </div>
+</section>
+
+<!-- DAY 2 -->
+<section class="day" id="day2">
+  <div class="day-title">Pull <span>Back, Biceps</span></div>
+
+  <div class="exercises" id="ex2"></div>
+
+  <h3 class="section">Diet &ndash; Day 2</h3>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 1</span>
+    <p class="meal-name">Veggie Omelette with Toast</p>
+    <p class="meal-desc">Omelette (2 whole eggs + 2 whites) with spinach/onion, 2 slices whole wheat toast</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 2 whole eggs + 2 egg whites, chopped spinach &amp; onion, salt &amp; pepper, 1 tsp oil, 2 slices whole wheat bread</p>
+      <ol>
+        <li>Whisk eggs with salt and pepper.</li>
+        <li>Sauté spinach and onion in oil for 2 min.</li>
+        <li>Pour eggs over vegetables, cook until set, fold and serve.</li>
+        <li>Toast the bread and serve alongside.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 2</span>
+    <p class="meal-name">Protein Oats Bowl</p>
+    <p class="meal-desc">40g oats + 1 scoop unsweetened protein powder + cinnamon + berries</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Same base method as <b>Day 1 &ndash; Option 1</b>: cook oats in water/milk, remove from heat, then stir in 1 scoop unsweetened pea/whey protein (off-heat so it doesn't clump), add cinnamon and top with berries.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Lunch</span>
+    <p class="meal-name">Lamb Curry with Quinoa</p>
+    <p class="meal-desc">150g lean lamb curry (leg or loin, light oil, no cream), 1 cup quinoa, side salad</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g lean lamb (leg or loin, visible fat trimmed), 1 onion, 1 tomato, ginger-garlic paste, turmeric/coriander/cumin powder, 1 tsp oil, 1 cup cooked quinoa, side salad</p>
+      <ol>
+        <li>Heat oil, sauté onion until golden.</li>
+        <li>Add ginger-garlic paste, cook 1 min.</li>
+        <li>Add tomato and spices, cook until oil separates.</li>
+        <li>Add lamb, cover and cook on low heat 25&ndash;30 min until tender, adding water as needed.</li>
+        <li>Serve with quinoa and salad.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Snack</span>
+    <p class="meal-name">Protein Shake or Curd &amp; Fruit</p>
+    <p class="meal-desc">Whey/pea protein shake (unsweetened, &lt;1g sugar) or plain curd + 1 fruit</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Option A:</b> 1 scoop unsweetened protein powder + 250ml water or unsweetened milk &mdash; shake well and drink. <br><b>Option B:</b> plain unsweetened curd topped with sliced fruit.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Dinner</span>
+    <p class="meal-name">Grilled Chicken with Sauteed Spinach &amp; Carrots</p>
+    <p class="meal-desc">150g grilled chicken, sauteed spinach + carrots</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g chicken breast, 1 cup spinach, 1/2 cup sliced carrots, 1 tsp oil, 1 clove garlic</p>
+      <ol>
+        <li>Grill or pan-sear chicken as in Day 1's lunch recipe.</li>
+        <li>Sauté garlic in oil for 30 sec, add carrots, cook 4 min.</li>
+        <li>Add spinach, cook until wilted.</li>
+        <li>Serve alongside the chicken.</li>
+      </ol>
+    </details>
+  </div>
+</section>
+
+<!-- DAY 3 -->
+<section class="day" id="day3">
+  <div class="day-title">Legs + Core</div>
+
+  <div class="exercises" id="ex3"></div>
+
+  <h3 class="section">Diet &ndash; Day 3</h3>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 1</span>
+    <p class="meal-name">Protein Oats Bowl</p>
+    <p class="meal-desc">40g oats + 1 scoop unsweetened protein powder + berries</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Same as <b>Day 1 &ndash; Option 1</b> oats method, stirring in 1 scoop unsweetened protein powder off-heat instead of chia/flaxseed.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 2</span>
+    <p class="meal-name">Boiled Egg Whites</p>
+    <p class="meal-desc">3 boiled egg whites + 1 whole egg + handful berries</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <ol>
+        <li>Boil eggs for 9&ndash;10 min.</li>
+        <li>Cool in cold water, peel, and separate extra whites if using more than one egg.</li>
+        <li>Serve with a handful of berries.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Lunch</span>
+    <p class="meal-name">Grilled Fish, Brown Rice &amp; Salad</p>
+    <p class="meal-desc">150g grilled fish (tilapia or basa), 1 cup brown rice, cucumber-tomato salad</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g tilapia or basa fillet, 1 tsp oil, lemon juice, salt &amp; pepper, 1 cup brown rice, cucumber-tomato salad</p>
+      <ol>
+        <li>Marinate fish with lemon juice, salt and pepper for 10 min.</li>
+        <li>Pan-sear or grill 3&ndash;4 min per side until opaque and flaky.</li>
+        <li>Serve with rice and salad.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Snack</span>
+    <p class="meal-name">Walnuts &amp; Apple</p>
+    <p class="meal-desc">Handful walnuts + 1 apple</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Eat as is &mdash; no cooking needed. Slice the apple if preferred.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Dinner</span>
+    <p class="meal-name">Chicken Stir-Fry with Peppers &amp; Broccoli</p>
+    <p class="meal-desc">150g chicken stir-fry with bell peppers and broccoli</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g chicken breast (sliced into strips), bell peppers, broccoli florets, 1 tsp oil, 1 clove garlic, salt &amp; pepper</p>
+      <ol>
+        <li>Heat oil in a wok or pan on high heat.</li>
+        <li>Stir-fry chicken strips 4&ndash;5 min until browned and cooked through.</li>
+        <li>Add vegetables and garlic, stir-fry 4 min until crisp-tender.</li>
+        <li>Season and serve.</li>
+      </ol>
+    </details>
+  </div>
+</section>
+
+<!-- DAY 4 -->
+<section class="day" id="day4">
+  <div class="day-title">Cardio + Abs <span>Active recovery</span></div>
+
+  <div class="exercises" id="ex4"></div>
+
+  <h3 class="section">Diet &ndash; Day 4</h3>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 1</span>
+    <p class="meal-name">Vegetable Egg White Scramble</p>
+    <p class="meal-desc">Egg whites scrambled with onion, tomato &amp; spinach, 1 slice multigrain bread</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 3&ndash;4 egg whites, chopped onion, tomato, spinach, 1 tsp oil, 1 slice multigrain bread</p>
+      <ol>
+        <li>Sauté onion, tomato and spinach in oil for 2 min.</li>
+        <li>Add whisked egg whites, scramble until set.</li>
+        <li>Serve with toasted multigrain bread.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 2</span>
+    <p class="meal-name">Protein Oats Bowl</p>
+    <p class="meal-desc">40g oats + cinnamon + berries + 1 tbsp chia</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Same as <b>Day 1 &ndash; Option 1</b>.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Lunch</span>
+    <p class="meal-name">Lean Lamb with Mixed Vegetables &amp; Rice</p>
+    <p class="meal-desc">150g lean lamb (leg or loin, grilled/roasted), 1 cup mixed vegetables, small portion rice</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g lean lamb (leg or loin, trimmed of visible fat &mdash; avoid shoulder cuts/mince), mixed vegetables (carrot, beans, peas), small portion rice, 1 tsp oil, spices (cumin, coriander, black pepper)</p>
+      <ol>
+        <li>Marinate lamb with spices for 10 min.</li>
+        <li>Grill or roast at 200&deg;C for 20&ndash;25 min until cooked through (or pan-sear in minimal oil).</li>
+        <li>Steam the mixed vegetables.</li>
+        <li>Serve with a small portion of rice.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Snack</span>
+    <p class="meal-name">Roasted Chickpeas or Curd</p>
+    <p class="meal-desc">Roasted chickpeas (salt &amp; pepper) or plain curd</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <ol>
+        <li>Toss boiled chickpeas with a pinch of salt, pepper and paprika.</li>
+        <li>Roast in a dry pan or oven for 10 min until slightly crisp. (Or simply serve plain curd.)</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Dinner</span>
+    <p class="meal-name">Fish with Steamed Vegetables</p>
+    <p class="meal-desc">150g fish (tilapia or basa), steamed vegetables (light oil)</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g tilapia or basa, salt, pepper, lemon, mixed steamed vegetables</p>
+      <ol>
+        <li>Season fish with salt, pepper and lemon.</li>
+        <li>Bake or pan-sear 12&ndash;15 min.</li>
+        <li>Steam vegetables 6&ndash;8 min.</li>
+        <li>Serve together.</li>
+      </ol>
+    </details>
+  </div>
+</section>
+
+<!-- DAY 5 -->
+<section class="day" id="day5">
+  <div class="day-title">Arms Specialization <span>Biceps &amp; Triceps</span></div>
+
+  <div class="exercises" id="ex5"></div>
+
+  <h3 class="section">Diet &ndash; Day 5</h3>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 1</span>
+    <p class="meal-name">Whole Eggs with Fruit</p>
+    <p class="meal-desc">3 whole eggs (boiled or scrambled), 1 fruit (guava/orange)</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <ol>
+        <li>Boil eggs 9&ndash;10 min, or scramble in a non-stick pan with a pinch of salt.</li>
+        <li>Serve with sliced guava or orange.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 2</span>
+    <p class="meal-name">Protein Oats Bowl</p>
+    <p class="meal-desc">40g oats + protein powder + cinnamon</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Same as <b>Day 1 &ndash; Option 1</b>, stirring in protein powder off-heat.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Lunch</span>
+    <p class="meal-name">Chicken Breast with Quinoa &amp; Salad</p>
+    <p class="meal-desc">150g chicken breast, 1 cup quinoa or brown rice, salad</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Grill/pan-sear chicken as in <b>Day 1's lunch recipe</b>. Cook quinoa per packet instructions (usually 1 part quinoa to 2 parts water, simmer 12&ndash;15 min). Serve with salad.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Snack</span>
+    <p class="meal-name">Protein Shake with Berries</p>
+    <p class="meal-desc">Unsweetened protein shake + a few berries</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Shake 1 scoop unsweetened protein powder with 250ml water or unsweetened milk. Serve with a few berries on the side.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Dinner</span>
+    <p class="meal-name">Fish Curry with Sauteed Greens</p>
+    <p class="meal-desc">150g fish curry (rohu, pomfret, kingfish/surmai or salmon), sauteed spinach/kale</p>
+    <details class="recipe" id="recipe-fish-curry">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g rohu/pomfret/kingfish (surmai)/salmon, 1 onion, 1 tomato (or puree), ginger-garlic paste, turmeric/coriander/cumin powder, 1 tsp oil, spinach or kale, garlic</p>
+      <ol>
+        <li>Sauté onion until golden, add ginger-garlic paste, cook 1 min.</li>
+        <li>Add tomato and spices, cook until oil separates (keep it light &mdash; skip cream/coconut milk, or use very little).</li>
+        <li>Add fish pieces, simmer gently 8&ndash;10 min until just cooked &mdash; don't overcook or it'll break apart.</li>
+        <li>Separately sauté spinach/kale with a little garlic until wilted.</li>
+        <li>Serve together.</li>
+      </ol>
+    </details>
+  </div>
+</section>
+
+<!-- DAY 6 -->
+<section class="day" id="day6">
+  <div class="day-title">Full Body Functional</div>
+
+  <div class="exercises" id="ex6"></div>
+
+  <h3 class="section">Diet &ndash; Day 6</h3>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 1</span>
+    <p class="meal-name">Protein Oats with Chia</p>
+    <p class="meal-desc">Oats + unsweetened protein powder + chia seeds</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Same as <b>Day 1 &ndash; Option 1</b>, stirring in both protein powder and chia seeds off-heat.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 2</span>
+    <p class="meal-name">Egg White Scramble with Fruit</p>
+    <p class="meal-desc">3 egg whites + 1 whole egg + fruit</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Same as <b>Day 1 &ndash; Option 2</b>.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Lunch</span>
+    <p class="meal-name">Grilled Chicken with Rice &amp; Vegetable Curry</p>
+    <p class="meal-desc">150g grilled chicken, 1 cup rice, mixed vegetable curry</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g chicken breast, 1 cup rice, mixed vegetables (carrot, beans, peas, cauliflower), onion, tomato, spices, 1 tsp oil</p>
+      <ol>
+        <li>Grill or pan-sear chicken as in Day 1's lunch recipe.</li>
+        <li>For the curry: sauté onion, add tomato and spices, then mixed vegetables, cover and cook 10&ndash;12 min.</li>
+        <li>Serve chicken with rice and vegetable curry.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Snack</span>
+    <p class="meal-name">Curd &amp; Nuts</p>
+    <p class="meal-desc">Plain curd + mixed nuts (almonds/walnuts)</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Serve plain unsweetened curd topped with a handful of almonds or walnuts.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Dinner</span>
+    <p class="meal-name">Lean Lamb Stir-Fry</p>
+    <p class="meal-desc">150g lean lamb (leg/loin) stir-fried with vegetables</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g lean lamb (leg or loin, cut into strips), bell peppers, onion, 1 tsp oil, garlic, spices</p>
+      <ol>
+        <li>Marinate lamb strips briefly with spices.</li>
+        <li>Stir-fry in hot oil 5&ndash;6 min until browned and cooked through.</li>
+        <li>Add bell peppers and onion, stir-fry 3&ndash;4 min.</li>
+        <li>Serve hot.</li>
+      </ol>
+    </details>
+  </div>
+</section>
+
+<!-- DAY 7 -->
+<section class="day" id="day7">
+  <div class="day-title">Rest / Active Recovery</div>
+
+  <div class="exercises" id="ex7"></div>
+
+  <h3 class="section">Diet &ndash; Day 7</h3>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 1</span>
+    <p class="meal-name">Vegetable Egg White Omelette</p>
+    <p class="meal-desc">Egg whites with onion, tomato &amp; spinach</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 3&ndash;4 egg whites, chopped onion, tomato, spinach, 1 tsp oil, salt</p>
+      <ol>
+        <li>Whisk egg whites with a pinch of salt.</li>
+        <li>Sauté vegetables in oil, pour eggs over, cook until set, fold into an omelette.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Breakfast &ndash; Option 2</span>
+    <p class="meal-name">Protein Oats with Berries</p>
+    <p class="meal-desc">Oats + protein powder + berries</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Same as <b>Day 1 &ndash; Option 1</b>.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Lunch</span>
+    <p class="meal-name">Fish with Salad &amp; Rice</p>
+    <p class="meal-desc">150g fish (any from the rotation), salad, small portion rice</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Season and grill or bake fish as in Day 1's dinner recipe. Serve with a small portion of rice and fresh salad.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Snack</span>
+    <p class="meal-name">Fruit &amp; Nuts</p>
+    <p class="meal-desc">1 fruit (apple/berries) + handful nuts</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p>Eat as is &mdash; no cooking needed.</p>
+    </details>
+  </div>
+
+  <div class="meal-card">
+    <span class="meal-tag">Dinner</span>
+    <p class="meal-name">Chicken with Steamed Vegetables</p>
+    <p class="meal-desc">150g chicken, steamed vegetables</p>
+    <details class="recipe">
+      <summary>Recipe (serves 1)</summary>
+      <p class="r-ing"><b>Ingredients:</b> 150g chicken breast, salt, pepper, mixed vegetables (broccoli, carrots, French beans)</p>
+      <ol>
+        <li>Grill or pan-sear chicken as in Day 1's lunch recipe.</li>
+        <li>Steam vegetables 6&ndash;8 min.</li>
+        <li>Serve together.</li>
+      </ol>
+    </details>
+  </div>
+</section>
+
+<div class="note">
+  <b>Weekly repeat:</b> follow this 7-day structure for 4 straight weeks, increasing weight/reps slightly each week (see "How to read this plan" above). In week 5, deload (~40% lighter), then restart the cycle heavier.<br><br>
+  <b>Protein powder note:</b> choose a whey protein isolate labelled "no added sugar" / unsweetened or stevia-sweetened (aim for &lt;1g sugar per serving) as a post-workout top-up. Huel Black Edition is a vegan full-meal replacement (~1&ndash;5g sugar depending on flavor) &mdash; fine occasionally, but not necessary since you already eat chicken/fish/lamb.
+</div>
+
+</main>
+
+<footer>
+  This is general fitness and nutrition information, not medical advice. Please consult your doctor before starting a new exercise or diet program, especially given your interest in blood sugar management.
+</footer>
+
+<script>
+  // ===== Exercise data for both modes (diet is shared and lives in the DOM) =====
+  // Each exercise: {icon, name, sets, weight, video}. video === null => "No demo needed".
+  var PLAN = {
+    beginner: {
+      day1: [
+        {icon:'ico-press', name:'Barbell Bench Press', sets:'4 x 8&ndash;10', weight:'Start: empty barbell only (~15-20kg) &mdash; just the bar, no plates yet', video:'https://www.youtube.com/watch?v=rT7DgCr-3pg'},
+        {icon:'ico-ohp', name:'Standing Overhead Barbell Press', sets:'3 x 10', weight:'Start: empty barbell (~15-20kg), or 3-4kg dumbbells/hand', video:'https://www.youtube.com/watch?v=Si73_a6qoQE'},
+        {icon:'ico-dip', name:'Parallel Bar Triceps Dips', sets:'3 x 10&ndash;12', weight:'Start: knee/bench dips (feet on floor) until you build strength for full dips', video:'https://www.youtube.com/watch?v=J3WYrjNDLI4'},
+        {icon:'ico-pushdown', name:'Cable Triceps Pushdown', sets:'3 x 12', weight:'Start: 5-7kg (cable stack, lightest plate)', video:'https://www.youtube.com/watch?v=_w-HpW70nSQ'},
+        {icon:'ico-lateral', name:'Dumbbell Lateral Raises', sets:'3 x 15', weight:'Start: 2-3kg dumbbells/hand', video:'https://www.youtube.com/watch?v=z-kOn7flIZg'}
+      ],
+      day2: [
+        {icon:'ico-pullup', name:'Pull-ups (or assisted)', sets:'4 x 6&ndash;8', weight:'Start: Assisted pull-up machine at max assistance (-25 to -30kg), or band-assisted', video:'https://www.youtube.com/watch?v=vw5Xmu5CIew'},
+        {icon:'ico-row', name:'Bent-Over Barbell Row', sets:'4 x 10', weight:'Start: empty barbell (~15-20kg), or 4-5kg dumbbells/hand for one-arm rows', video:'https://www.youtube.com/watch?v=vT2GjY_Umpw'},
+        {icon:'ico-curl', name:'Standing Barbell Bicep Curl', sets:'3 x 12', weight:'Start: empty EZ-bar or barbell (~7-10kg)', video:'https://www.youtube.com/watch?v=JJB8XgKltA8'},
+        {icon:'ico-curl', name:'Dumbbell Hammer Curl', sets:'3 x 12/side', weight:'Start: 3-4kg dumbbells/hand', video:'https://www.youtube.com/watch?v=zC3nLlEvin4'},
+        {icon:'ico-latpull', name:'Lat Pulldown', sets:'3 x 10', weight:'Start: 12-15kg (cable stack, lightest plates)', video:'https://www.youtube.com/watch?v=JGeRYIZdojU'}
+      ],
+      day3: [
+        {icon:'ico-squat', name:'Barbell Back Squat', sets:'4 x 10', weight:'Start: bodyweight squats first, then empty barbell (~15-20kg) once form feels solid', video:'https://www.youtube.com/watch?v=8PMjqgR8Wa8'},
+        {icon:'ico-lunge', name:'Walking Lunges', sets:'3 x 12/leg', weight:'Start: Bodyweight only', video:'https://www.youtube.com/watch?v=mAgbXQdd4LM'},
+        {icon:'ico-plank', name:'Plank', sets:'3 x 45 sec hold', weight:'Start: Bodyweight &mdash; hold 15-20 sec to start, build up gradually', video:'https://www.youtube.com/watch?v=mwlp75MS6Rg'},
+        {icon:'ico-legpress', name:'Leg Press', sets:'3 x 12', weight:'Start: 20-30kg (light sled weight)', video:'https://www.youtube.com/watch?v=ETOAyWM6i6A'},
+        {icon:'ico-calf', name:'Standing Calf Raises', sets:'4 x 15', weight:'Start: Bodyweight only', video:'https://www.youtube.com/watch?v=k67UjgvJdEk'}
+      ],
+      day4: [
+        {icon:'ico-walk', name:'Brisk Walk / Cycling', sets:'30&ndash;40 min steady pace', weight:'No weight needed', video:null},
+        {icon:'ico-twist', name:'Russian Twists', sets:'3 x 20', weight:'Start: Bodyweight only (no plate yet)', video:'https://www.youtube.com/watch?v=DF0sPfwys_g'},
+        {icon:'ico-hanglegraise', name:'Hanging Leg Raises', sets:'3 x 12', weight:'Start: Bodyweight &mdash; bend knees if straight-leg version is too hard', video:'https://www.youtube.com/watch?v=Pr1ieGZ5atk'},
+        {icon:'ico-bicyclecrunch', name:'Bicycle Crunches', sets:'3 x 20', weight:'Start: Bodyweight', video:'https://www.youtube.com/watch?v=1we3bh9uhqY'}
+      ],
+      day5: [
+        {icon:'ico-curl', name:'Preacher Curl', sets:'3 x 10', weight:'Start: empty EZ-bar (~5-7kg)', video:'https://www.youtube.com/watch?v=BPmUhDtdQfw'},
+        {icon:'ico-skullcrusher', name:'Skull Crushers (Lying Triceps Extension)', sets:'3 x 12', weight:'Start: empty EZ-bar (~5-7kg)', video:'https://www.youtube.com/watch?v=4re6CJ0XNF8'},
+        {icon:'ico-press', name:'Close-Grip Bench Press', sets:'3 x 10', weight:'Start: empty barbell only (~15-20kg)', video:'https://www.youtube.com/watch?v=UYJsFzqdgK4'},
+        {icon:'ico-curl', name:'Concentration Curl', sets:'3 x 12/arm', weight:'Start: 2-3kg dumbbell', video:'https://www.youtube.com/watch?v=oPGBZHIxusU'},
+        {icon:'ico-pushdown', name:'Cable Rope Pushdown', sets:'3 x 15', weight:'Start: 5-7kg (cable stack, lightest plate)', video:'https://www.youtube.com/watch?v=qHDrQglWgS4'}
+      ],
+      day6: [
+        {icon:'ico-deadlift', name:'Barbell Deadlift', sets:'4 x 8', weight:'Start: empty barbell only (~15-20kg) &mdash; deadlift form first, weight later', video:'https://www.youtube.com/watch?v=VG64cp5KTNo'},
+        {icon:'ico-kbswing', name:'Kettlebell Swings', sets:'3 x 15', weight:'Start: 4-6kg kettlebell', video:'https://www.youtube.com/watch?v=PO343opm22o'},
+        {icon:'ico-pushup', name:'Push-ups', sets:'3 x max reps', weight:'Start: knee push-ups if full push-ups are too hard', video:'https://www.youtube.com/watch?v=WDIpL0pjun0'},
+        {icon:'ico-squat', name:'Bodyweight Squats', sets:'3 x 15', weight:'Start: Bodyweight only', video:'https://www.youtube.com/watch?v=l83R5PblSMA'}
+      ],
+      day7: [
+        {icon:'ico-stretch', name:'Light walk (20&ndash;30 min) or gentle stretching / yoga', sets:'No weights &mdash; full recovery day', weight:'No weight needed', video:null}
+      ]
+    },
+    medium: {
+      day1: [
+        {icon:'ico-press', name:'Barbell Bench Press', sets:'4 x 10&ndash;12', weight:'Working weight: 40&ndash;50kg &mdash; controlled tempo, keep 1&ndash;2 reps in reserve', video:'https://www.youtube.com/watch?v=rT7DgCr-3pg'},
+        {icon:'ico-ohp', name:'Standing Overhead Barbell Press', sets:'4 x 8&ndash;10', weight:'Working weight: 25&ndash;30kg, or 10-12kg dumbbells/hand', video:'https://www.youtube.com/watch?v=Si73_a6qoQE'},
+        {icon:'ico-dip', name:'Parallel Bar Triceps Dips', sets:'4 x 12', weight:'Full unassisted dips through a full range &mdash; add a dip belt once bodyweight feels easy', video:'https://www.youtube.com/watch?v=J3WYrjNDLI4'},
+        {icon:'ico-pushdown', name:'Cable Triceps Pushdown', sets:'3 x 12', weight:'Working weight: 15&ndash;20kg (cable stack)', video:'https://www.youtube.com/watch?v=_w-HpW70nSQ'},
+        {icon:'ico-lateral', name:'Dumbbell Lateral Raises', sets:'3 x 15', weight:'Working weight: 5-7kg dumbbells/hand &mdash; strict form, no swinging', video:'https://www.youtube.com/watch?v=z-kOn7flIZg'}
+      ],
+      day2: [
+        {icon:'ico-pullup', name:'Pull-ups', sets:'4 x 8&ndash;10', weight:'Bodyweight &mdash; light band assistance only if needed; add load once you clear 10 clean reps', video:'https://www.youtube.com/watch?v=vw5Xmu5CIew'},
+        {icon:'ico-row', name:'Bent-Over Barbell Row', sets:'4 x 10', weight:'Working weight: 35&ndash;45kg &mdash; flat back, controlled pull to the waist', video:'https://www.youtube.com/watch?v=vT2GjY_Umpw'},
+        {icon:'ico-curl', name:'Standing Barbell Bicep Curl', sets:'3 x 12', weight:'Working weight: 20&ndash;25kg EZ-bar/barbell &mdash; no body swing', video:'https://www.youtube.com/watch?v=JJB8XgKltA8'},
+        {icon:'ico-curl', name:'Dumbbell Hammer Curl', sets:'3 x 12/side', weight:'Working weight: 8-10kg dumbbells/hand', video:'https://www.youtube.com/watch?v=zC3nLlEvin4'},
+        {icon:'ico-latpull', name:'Lat Pulldown', sets:'3 x 10', weight:'Working weight: 30&ndash;40kg (cable stack)', video:'https://www.youtube.com/watch?v=JGeRYIZdojU'}
+      ],
+      day3: [
+        {icon:'ico-squat', name:'Barbell Back Squat', sets:'4 x 10', weight:'Working weight: 50&ndash;60kg &mdash; depth to parallel, controlled tempo, add load weekly', video:'https://www.youtube.com/watch?v=8PMjqgR8Wa8'},
+        {icon:'ico-lunge', name:'Walking Lunges', sets:'3 x 12/leg', weight:'Working weight: 10kg dumbbell/hand', video:'https://www.youtube.com/watch?v=mAgbXQdd4LM'},
+        {icon:'ico-plank', name:'Plank', sets:'3 x 60 sec hold', weight:'Bodyweight &mdash; add a plate on the back once 60 sec feels easy', video:'https://www.youtube.com/watch?v=mwlp75MS6Rg'},
+        {icon:'ico-legpress', name:'Leg Press', sets:'3 x 12', weight:'Working weight: 60&ndash;80kg (sled)', video:'https://www.youtube.com/watch?v=ETOAyWM6i6A'},
+        {icon:'ico-calf', name:'Standing Calf Raises', sets:'4 x 15', weight:'Working weight: hold 10-12kg dumbbells, full stretch and squeeze', video:'https://www.youtube.com/watch?v=k67UjgvJdEk'}
+      ],
+      day4: [
+        {icon:'ico-walk', name:'Brisk Walk / Cycling', sets:'30&ndash;40 min steady pace', weight:'No weight needed', video:null},
+        {icon:'ico-twist', name:'Russian Twists', sets:'3 x 20', weight:'Add a 5kg plate &mdash; controlled rotation, feet off the floor', video:'https://www.youtube.com/watch?v=DF0sPfwys_g'},
+        {icon:'ico-hanglegraise', name:'Hanging Leg Raises', sets:'3 x 15', weight:'Bodyweight &mdash; straight-leg, full range, no swinging', video:'https://www.youtube.com/watch?v=Pr1ieGZ5atk'},
+        {icon:'ico-bicyclecrunch', name:'Bicycle Crunches', sets:'3 x 25', weight:'Bodyweight &mdash; slow and controlled, full twist each rep', video:'https://www.youtube.com/watch?v=1we3bh9uhqY'}
+      ],
+      day5: [
+        {icon:'ico-curl', name:'Preacher Curl', sets:'3 x 10', weight:'Working weight: 12&ndash;15kg EZ-bar', video:'https://www.youtube.com/watch?v=BPmUhDtdQfw'},
+        {icon:'ico-skullcrusher', name:'Skull Crushers (Lying Triceps Extension)', sets:'3 x 12', weight:'Working weight: 12&ndash;15kg EZ-bar &mdash; elbows fixed, controlled tempo', video:'https://www.youtube.com/watch?v=4re6CJ0XNF8'},
+        {icon:'ico-press', name:'Close-Grip Bench Press', sets:'3 x 10', weight:'Working weight: 35&ndash;40kg', video:'https://www.youtube.com/watch?v=UYJsFzqdgK4'},
+        {icon:'ico-curl', name:'Concentration Curl', sets:'3 x 12/arm', weight:'Working weight: 6-8kg dumbbell &mdash; strict, no swing', video:'https://www.youtube.com/watch?v=oPGBZHIxusU'},
+        {icon:'ico-pushdown', name:'Cable Rope Pushdown', sets:'3 x 15', weight:'Working weight: 15&ndash;20kg (cable stack)', video:'https://www.youtube.com/watch?v=qHDrQglWgS4'}
+      ],
+      day6: [
+        {icon:'ico-deadlift', name:'Barbell Deadlift', sets:'4 x 8', weight:'Working weight: 60&ndash;70kg &mdash; flat back, drive through the heels, add load weekly', video:'https://www.youtube.com/watch?v=VG64cp5KTNo'},
+        {icon:'ico-kbswing', name:'Kettlebell Swings', sets:'3 x 15', weight:'Working weight: 12&ndash;16kg kettlebell &mdash; explosive hip hinge', video:'https://www.youtube.com/watch?v=PO343opm22o'},
+        {icon:'ico-pushup', name:'Push-ups', sets:'3 x 20&ndash;25', weight:'Full push-ups through a full range &mdash; add a plate on the back once reps feel easy', video:'https://www.youtube.com/watch?v=WDIpL0pjun0'},
+        {icon:'ico-squat', name:'Goblet / Bodyweight Squats', sets:'3 x 20', weight:'Hold a 12&ndash;16kg dumbbell/kettlebell at the chest', video:'https://www.youtube.com/watch?v=l83R5PblSMA'}
+      ],
+      day7: [
+        {icon:'ico-stretch', name:'Light walk (20&ndash;30 min) or gentle stretching / yoga', sets:'No weights &mdash; full recovery day', weight:'No weight needed', video:null}
+      ]
+    }
+  };
+
+  var FRAMEWORK = {
+    beginner: '<b>How to read this plan</b>'
+      + '<ul>'
+      + '<li><b>Sets x Reps</b> (e.g. 3x12) = 3 sets of 12 reps, with 60&ndash;90 sec rest between sets.</li>'
+      + '<li><b>Progressive overload (iteration):</b> repeat this 7-day cycle for 4 straight weeks. Each week, add 2.5&ndash;5% more weight or 1&ndash;2 more reps once a set feels easy. In week 5, cut weight ~40% ("deload") to recover, then restart the cycle heavier.</li>'
+      + '<li><b>You\'re a beginner &mdash; this is expected and fine:</b> struggling with 10kg is completely normal on day one; your muscles, tendons and nervous system all need time to adapt, regardless of body type. Starting weights below are deliberately light (often just the empty bar, or small dumbbells) so you can nail the movement pattern first. <b>Form before weight, every time</b> &mdash; add load only once a movement feels controlled and pain-free for all reps.</li>'
+      + '<li><b>Protein target:</b> ~140g/day (2g per kg body weight).</li>'
+      + '<li><b>General fitness note (not medical advice):</b> resistance training and daily movement support insulin sensitivity. Keep carbs complex/low-GI and monitor blood sugar around workouts as your doctor advises.</li>'
+      + '<li><b>Blood-sugar-conscious diet design:</b> every meal below uses low-GI carbs (oats, brown rice, quinoa) instead of refined grains, no added sugar anywhere, higher fibre (vegetables + chia/flaxseed) to slow glucose absorption, and lean protein at every meal to blunt carb spikes. Portions are kept moderate rather than large single carb loads.</li>'
+      + '</ul>',
+    medium: '<b>How to read this plan</b>'
+      + '<ul>'
+      + '<li><b>Sets x Reps</b> (e.g. 3x12) = 3 sets of 12 reps, with 60&ndash;90 sec rest between sets.</li>'
+      + '<li><b>Progressive overload (iteration):</b> repeat this 7-day cycle for 4 straight weeks. Each week, add 2.5&ndash;5% more weight or 1&ndash;2 more reps once a set feels easy. In week 5, cut weight ~40% ("deload") to recover, then restart the cycle heavier.</li>'
+      + '<li><b>You\'re past the beginner phase:</b> the loads below are real working weights, not just the empty bar. Push each set to within 1&ndash;2 reps of failure while keeping clean form, and add 2.5&ndash;5% load each week once the top of the rep range feels controlled. <b>Form before weight, every time</b> &mdash; never trade range of motion for a heavier plate.</li>'
+      + '<li><b>Protein target:</b> ~140g/day (2g per kg body weight).</li>'
+      + '<li><b>General fitness note (not medical advice):</b> resistance training and daily movement support insulin sensitivity. Keep carbs complex/low-GI and monitor blood sugar around workouts as your doctor advises.</li>'
+      + '<li><b>Blood-sugar-conscious diet design:</b> every meal below uses low-GI carbs (oats, brown rice, quinoa) instead of refined grains, no added sugar anywhere, higher fibre (vegetables + chia/flaxseed) to slow glucose absorption, and lean protein at every meal to blunt carb spikes. Portions are kept moderate rather than large single carb loads.</li>'
+      + '</ul>'
+  };
+
+  var days = ['day1','day2','day3','day4','day5','day6','day7'];
+  var labels = ['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6','Day 7'];
+  var tabsEl = document.getElementById('tabs');
+  var frameworkEl = document.getElementById('framework');
+  var modesEl = document.getElementById('modes');
+  var currentMode = 'beginner';
+
+  function exerciseCard(ex){
+    var media = ex.video
+      ? '<a class="watch" href="' + ex.video + '" target="_blank">▶ Watch demo</a>'
+        + '<span class="url">' + ex.video.replace('https://www.', '') + '</span>'
+      : '<span class="no-video">No demo needed</span>';
+    return '<div class="card">'
+      + '<div class="icon-wrap"><svg viewBox="0 0 100 100"><use href="#' + ex.icon + '" xlink:href="#' + ex.icon + '"/></svg></div>'
+      + '<div class="card-body">'
+      + '<p class="ex-name">' + ex.name + '</p>'
+      + '<p class="ex-sets">' + ex.sets + '</p>'
+      + '<p class="ex-weight">' + ex.weight + '</p>'
+      + media
+      + '</div></div>';
+  }
+
+  function renderMode(mode){
+    if(mode !== 'beginner' && mode !== 'medium'){ mode = 'beginner'; }
+    currentMode = mode;
+    var data = PLAN[mode];
+    days.forEach(function(id, i){
+      var container = document.getElementById('ex' + (i + 1));
+      container.innerHTML = (data[id] || []).map(exerciseCard).join('');
+    });
+    frameworkEl.innerHTML = FRAMEWORK[mode];
+    Array.prototype.forEach.call(modesEl.children, function(b){
+      b.classList.toggle('active', b.getAttribute('data-mode') === mode);
+    });
+  }
+
+  function buildTabs(){
+    tabsEl.innerHTML = '';
+    days.forEach(function(id, i){
+      var btn = document.createElement('button');
+      btn.textContent = labels[i];
+      btn.onclick = function(){ showDay(id, btn); };
+      tabsEl.appendChild(btn);
+    });
+  }
+
+  function showDay(id, btn){
+    days.forEach(function(d){ document.getElementById(d).classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    Array.prototype.forEach.call(tabsEl.children, function(b){ b.classList.remove('active'); });
+    if(btn){ btn.classList.add('active'); }
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function selectMode(mode){
+    try { localStorage.setItem('fitnessMode', mode); } catch(e) {}
+    renderMode(mode);
+    // reset to day 1 for predictable scroll-to-top
+    days.forEach(function(d){ document.getElementById(d).classList.remove('active'); });
+    document.getElementById('day1').classList.add('active');
+    Array.prototype.forEach.call(tabsEl.children, function(b, i){
+      b.classList.toggle('active', i === 0);
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  Array.prototype.forEach.call(modesEl.children, function(b){
+    b.addEventListener('click', function(){ selectMode(b.getAttribute('data-mode')); });
+  });
+
+  // ===== Init: restore persisted mode (default beginner) before first paint of day content =====
+  var savedMode = 'beginner';
+  try {
+    var stored = localStorage.getItem('fitnessMode');
+    if(stored === 'beginner' || stored === 'medium'){ savedMode = stored; }
+  } catch(e) {}
+
+  buildTabs();
+  renderMode(savedMode);
+  document.getElementById('day1').classList.add('active');
+  if(tabsEl.children.length){ tabsEl.children[0].classList.add('active'); }
+
+  // ===== PWA service worker registration =====
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('./service-worker.js');
+    });
+  }
+</script>
+
+</body>
+</html>
