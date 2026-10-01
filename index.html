@@ -76,8 +76,12 @@
   details.recipe ol{margin:4px 0 0 0; padding-left:18px; color:var(--text);}
   details.recipe ol li{margin-bottom:4px; line-height:1.4;}
   .watch{display:inline-flex; align-items:center; gap:6px; background:var(--accent); color:#0d1f1c;
-    font-size:12.5px; font-weight:700; padding:6px 11px; border-radius:8px; text-decoration:none;}
-  .url{display:block; font-size:10.5px; color:var(--muted); margin-top:5px; word-break:break-all;}
+    font-size:12.5px; font-weight:700; padding:6px 11px; border-radius:8px; text-decoration:none;
+    font-family:inherit; border:0; cursor:pointer;}
+  .video-embed{}
+  .video-embed.open{position:relative; padding-top:56.25%; margin-top:8px; border-radius:12px;
+    overflow:hidden; background:#000;}
+  .video-embed iframe{position:absolute; inset:0; width:100%; height:100%; border:0;}
   .no-video{font-size:12.5px; color:var(--muted);}
 
   h3.section{font-size:13.5px; color:var(--accent2); margin:20px 0 8px 0; font-weight:700;}
@@ -90,10 +94,16 @@
   .note{background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:12px 14px;
     font-size:12.5px; line-height:1.5; margin-top:16px;}
   .note b{color:var(--accent2);}
-  .framework{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px;
-    margin-bottom:18px; font-size:12.5px; line-height:1.55;}
+  .framework-details{background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:12px 16px; margin-bottom:18px;}
+  .framework-details > summary{cursor:pointer; color:var(--accent); font-weight:700; font-size:13px;
+    list-style:none;}
+  .framework-details > summary::-webkit-details-marker{display:none;}
+  .framework-details > summary::before{content:"▸ ";}
+  .framework-details[open] > summary::before{content:"▾ ";}
+  .framework{font-size:12.5px; line-height:1.55; margin-top:8px;}
   .framework b{color:var(--accent);}
-  .framework ul{margin:8px 0 0 0; padding-left:18px;}
+  .framework ul{margin:4px 0 0 0; padding-left:18px;}
   .framework li{margin-bottom:6px;}
   footer{padding:18px 16px 0 16px; font-size:11px; color:var(--muted); line-height:1.5;}
   .install-tip{margin:14px 16px 0 16px; background:var(--panel2); border:1px dashed var(--accent);
@@ -337,7 +347,7 @@
 
 <main>
 
-<div class="framework" id="framework"></div>
+<details class="framework-details"><summary>How to read this plan</summary><div class="framework" id="framework"></div></details>
 
 <!-- DAY 1 -->
 <section class="day" id="day1">
@@ -345,7 +355,7 @@
 
   <div class="exercises" id="ex1"></div>
 
-  <h3 class="section">Diet &ndash; Day 1</h3>
+  <h3 class="section">Diet &ndash; Mon</h3>
 
   <div class="meal-card">
     <span class="meal-tag">Breakfast &ndash; Option 1</span>
@@ -433,7 +443,7 @@
 
   <div class="exercises" id="ex2"></div>
 
-  <h3 class="section">Diet &ndash; Day 2</h3>
+  <h3 class="section">Diet &ndash; Tue</h3>
 
   <div class="meal-card">
     <span class="meal-tag">Breakfast &ndash; Option 1</span>
@@ -511,7 +521,7 @@
 
   <div class="exercises" id="ex3"></div>
 
-  <h3 class="section">Diet &ndash; Day 3</h3>
+  <h3 class="section">Diet &ndash; Wed</h3>
 
   <div class="meal-card">
     <span class="meal-tag">Breakfast &ndash; Option 1</span>
@@ -585,7 +595,7 @@
 
   <div class="exercises" id="ex4"></div>
 
-  <h3 class="section">Diet &ndash; Day 4</h3>
+  <h3 class="section">Diet &ndash; Thu</h3>
 
   <div class="meal-card">
     <span class="meal-tag">Breakfast &ndash; Option 1</span>
@@ -664,7 +674,7 @@
 
   <div class="exercises" id="ex5"></div>
 
-  <h3 class="section">Diet &ndash; Day 5</h3>
+  <h3 class="section">Diet &ndash; Fri</h3>
 
   <div class="meal-card">
     <span class="meal-tag">Breakfast &ndash; Option 1</span>
@@ -733,7 +743,7 @@
 
   <div class="exercises" id="ex6"></div>
 
-  <h3 class="section">Diet &ndash; Day 6</h3>
+  <h3 class="section">Diet &ndash; Sat</h3>
 
   <div class="meal-card">
     <span class="meal-tag">Breakfast &ndash; Option 1</span>
@@ -803,7 +813,7 @@
 
   <div class="exercises" id="ex7"></div>
 
-  <h3 class="section">Diet &ndash; Day 7</h3>
+  <h3 class="section">Diet &ndash; Sun</h3>
 
   <div class="meal-card">
     <span class="meal-tag">Breakfast &ndash; Option 1</span>
@@ -973,16 +983,14 @@
   };
 
   var FRAMEWORK = {
-    beginner: '<b>How to read this plan</b>'
-      + '<ul>'
+    beginner: '<ul>'
       + '<li><b>Sets x Reps</b> (e.g. 3x12) = 3 sets of 12 reps, with 60&ndash;90 sec rest between sets.</li>'
       + '<li><b>Progressive overload (iteration):</b> repeat this 7-day cycle for 4 straight weeks. Each week, add 2.5&ndash;5% more weight or 1&ndash;2 more reps once a set feels easy. In week 5, cut weight ~40% ("deload") to recover, then restart the cycle heavier.</li>'
       + '<li><b>You\'re a beginner &mdash; this is expected and fine:</b> struggling with 10kg is completely normal on day one; your muscles, tendons and nervous system all need time to adapt. Starting weights below are deliberately light (often just the empty bar, or small dumbbells) so you can nail the movement pattern first. <b>Form before weight, every time</b> &mdash; add load only once a movement feels controlled and pain-free for all reps.</li>'
       + '<li><b>Protein target:</b> ~140g/day (2g per kg body weight).</li>'
       + '<li><b>Clean diet design:</b> every meal below uses complex, low-GI carbs (oats, brown rice, quinoa) instead of refined grains, no added sugar, higher fibre (vegetables + chia/flaxseed), and lean protein at every meal. Portions are kept moderate.</li>'
       + '</ul>',
-    medium: '<b>How to read this plan</b>'
-      + '<ul>'
+    medium: '<ul>'
       + '<li><b>Sets x Reps</b> (e.g. 3x12) = 3 sets of 12 reps, with 60&ndash;90 sec rest between sets.</li>'
       + '<li><b>Progressive overload (iteration):</b> repeat this 7-day cycle for 4 straight weeks. Each week, add 2.5&ndash;5% more weight or 1&ndash;2 more reps once a set feels easy. In week 5, cut weight ~40% ("deload") to recover, then restart the cycle heavier.</li>'
       + '<li><b>You\'re past the beginner phase:</b> the loads below are real working weights, not just the empty bar. Push each set to within 1&ndash;2 reps of failure while keeping clean form, and add 2.5&ndash;5% load each week once the top of the rep range feels controlled. <b>Form before weight, every time</b> &mdash; never trade range of motion for a heavier plate.</li>'
@@ -992,17 +1000,21 @@
   };
 
   var days = ['day1','day2','day3','day4','day5','day6','day7'];
-  var labels = ['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6','Day 7'];
+  var labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var tabsEl = document.getElementById('tabs');
   var frameworkEl = document.getElementById('framework');
   var modesEl = document.getElementById('modes');
   var currentMode = 'beginner';
 
   function exerciseCard(ex){
-    var media = ex.video
-      ? '<a class="watch" href="' + ex.video + '" target="_blank">▶ Watch demo</a>'
-        + '<span class="url">' + ex.video.replace('https://www.', '') + '</span>'
-      : '<span class="no-video">No demo needed</span>';
+    var media;
+    if(ex.video){
+      var vid = ex.video.split('v=')[1];
+      media = '<button type="button" class="watch" data-video="' + vid + '">▶ Watch demo</button>'
+        + '<div class="video-embed"></div>';
+    } else {
+      media = '<span class="no-video">No demo needed</span>';
+    }
     return '<div class="card">'
       + '<div class="icon-wrap"><svg viewBox="0 0 100 100"><use href="#' + ex.icon + '" xlink:href="#' + ex.icon + '"/></svg></div>'
       + '<div class="card-body">'
@@ -1059,6 +1071,26 @@
 
   Array.prototype.forEach.call(modesEl.children, function(b){
     b.addEventListener('click', function(){ selectMode(b.getAttribute('data-mode')); });
+  });
+
+  // ===== Delegated handler: lazy inline YouTube embed, toggle on tap =====
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('.watch[data-video]') : null;
+    if(!btn){ return; }
+    var vid = btn.getAttribute('data-video');
+    var embed = btn.nextElementSibling;
+    if(!embed || !embed.classList.contains('video-embed')){ return; }
+    if(embed.classList.contains('open')){
+      embed.classList.remove('open');
+      embed.innerHTML = '';
+      btn.textContent = '▶ Watch demo';
+    } else {
+      embed.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + vid + '"'
+        + ' loading="lazy" allowfullscreen'
+        + ' allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>';
+      embed.classList.add('open');
+      btn.textContent = '▾ Hide demo';
+    }
   });
 
   // ===== Init: restore persisted mode (default beginner) before first paint of day content =====

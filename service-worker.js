@@ -1,5 +1,5 @@
 // Cache-first service worker for the 7-Day Fitness Plan PWA.
-var CACHE_NAME = 'fitness-cache-v1';
+var CACHE_NAME = 'fitness-cache-v2';
 var PRECACHE_URLS = [
   './',
   './index.html',
@@ -33,6 +33,8 @@ self.addEventListener('activate', function(event){
 
 self.addEventListener('fetch', function(event){
   if(event.request.method !== 'GET'){ return; }
+  // Cross-origin requests (e.g. embedded video players) bypass the cache and go to the network.
+  if(new URL(event.request.url).origin !== self.location.origin){ return; }
   event.respondWith(
     caches.match(event.request).then(function(cached){
       if(cached){ return cached; }
